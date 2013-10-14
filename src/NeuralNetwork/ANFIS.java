@@ -5,11 +5,11 @@ import java.util.Random;
 public class ANFIS extends Network {
 	
 	double[][][] centersList;
-	double[] spreadList;
+	double[][] spreadList;
 	int rules;
 	double[][][] consequentParameters;
 	double consequentParametersMin = -0.3;
-	double consequentParametersMax = -0.3;
+	double consequentParametersMax = 0.3;
 	
 	
 	//Neuron defaultInputNeuron = new Neuron(FunctionType.LINEAR);
@@ -44,10 +44,12 @@ public class ANFIS extends Network {
 	protected double[][][] calculateCentersRanges(double[][][] inputs) {
 		
 		double[][][] centers = new double[inputs[0][1].length][inputs[0][0].length * rules][1];
-		spreadList = new double[inputs[0][0].length * rules];
+		spreadList = new double[inputs[1][0].length][inputs[0][0].length * rules];
 		
 		double[] mins = new double[inputs[0][0].length];
 		double[] maxs = new double[inputs[0][0].length];
+		
+		// TODO: different mins and maxs should be calculated for each class (input stream)
 		
 		// get mins and maxs of each input parameter
 		for (int i = 0; i < inputs.length; i++) {
@@ -68,8 +70,8 @@ public class ANFIS extends Network {
 				// duplicate centers for each network stream
 				for (int k = 0; k < inputs[0][1].length; k++) {
 					centers[k][layer1Index][0] = mins[i] + j * stepSize;
+					spreadList[k][layer1Index++] = dmax / Math.sqrt(rules);
 				}
-				spreadList[layer1Index++] = dmax / Math.sqrt(rules);
 			}
 		}
 		
@@ -173,26 +175,21 @@ public class ANFIS extends Network {
 	 */
 	private void backpropagate(double[] targets, double[] results) {
 		
-		double[][] errors = new double[Layers.size()][];
-		
 		// UPDATE PREMISE PARAMS WITH GRADIENT DESCENT
 		
-		// update output layer
-		errors[errors.length - 1] = new double[results.length];
-		
-		/*
 		for (int j = 0; j < results.length; j++) {
+			
 			double diff = (targets[j] - results[j]);
 			maxError = Math.max(maxError, Math.pow(diff, 2));
-			errors[errors.length - 1][j] = diff;
-			for (int k = 0; k < hidden.size(); k++) {
-				double update = (rate * hidden.getNeuron(k).output * errors[outIndex][j]);
-				output.weights[j][k] += update;
-				output.oldWeights[j][k] = update;
-				change = Math.max(change, Math.abs(update));
+			
+			Layer layer = Layer1List[j];
+			
+			for (int k = 0; k < Layer1List[j].size(); k++) {
+				double update = -1 * rate * Layer1List[j].getNeuron(k).output * diff;
+				spreadList[j][k] += update;
 			}
+			
 		}
-		*/
 		
 		/*
 		int outIndex = (Layers.size() - 1);
@@ -236,7 +233,7 @@ public class ANFIS extends Network {
 		return outputs;
 	}
 	
-	private double runSingleOutput(double[] inputs, Layer Layer1, double[][] centers, double spread, double[][] consequentParams) {
+	private double runSingleOutput(double[] inputs, Layer Layer1, double[][] centers, double[] spread, double[][] consequentParams) {
 		
 		// feed inputs to layer 1
 		double[] inputLayer1 = new double[inputs.length * rules];
@@ -245,7 +242,7 @@ public class ANFIS extends Network {
 				inputLayer1[i * rules + j] = inputs[i];
 		double[] outputLayer1 = new double[inputLayer1.length];
 		for (int i = 0; i < Layer1.size(); i++) {
-			outputLayer1[i] = Layer1.getNeuron(i).fire(norm(new double[]{inputLayer1[i]}, centers[i]), spread);
+			outputLayer1[i] = Layer1.getNeuron(i).fire(norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
 			System.out.print(inputLayer1[i]+"=>"+outputLayer1[i]+" ");
 		}
 		System.out.println("");
