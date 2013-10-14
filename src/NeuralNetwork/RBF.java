@@ -17,7 +17,6 @@ public class RBF extends Network {
 	 */
 	public RBF() {
 		rate = 3.0;   // ???
-		//maxInputs = 1500;
 	}
 	
 	public void setCenters(double[][] centers) {

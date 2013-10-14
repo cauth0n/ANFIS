@@ -12,7 +12,13 @@ import java.util.TreeSet;
  * Letter Rec: Letter, followed by 16 attributes (20000 examples in set)
  * Opt Digits: 64 attributes, last one is number (1797 test examples) (3823 train examples)
  * Pen Digits: 16 inputs, last one is number   (attributes have larger range, consider normalizing) (3498 test examples) (7494 train examples)
- *    Semeion: 256 attributes (16 x 16 array of pixels), followed by 10 element vector, digits 0-9   (1593 examples in set) (remember to shuffle)
+ * Semeion: 256 attributes (16 x 16 array of pixels), followed by 10 element vector, digits 0-9   (1593 examples in set) (remember to shuffle)
+ * 
+ * DATA ARRAY (sometimes called inputs)
+ * ---------------------------------------
+ * first index points to specific input-output example
+ * second index points to either input vector (0) or output vector (1)
+ * ex: inputs[5][0][7] = the fifth pattern, 7th element of input vector
  * 
  */
 

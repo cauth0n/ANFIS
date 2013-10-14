@@ -43,34 +43,42 @@ public class ANFIS extends Network {
 	
 	protected double[][][] calculateCentersRanges(double[][][] inputs) {
 		
-		double[][][] centers = new double[inputs[0][1].length][inputs[0][0].length * rules][1];
-		spreadList = new double[inputs[1][0].length][inputs[0][0].length * rules];
+		int numPatterns = inputs.length;
+		int numStreams = inputs[0][1].length;
+		int numInputs = inputs[0][0].length;
+		int numInputNeurons = numInputs * rules;
 		
-		double[] mins = new double[inputs[0][0].length];
-		double[] maxs = new double[inputs[0][0].length];
+		double[][][] centers = new double[numStreams][numInputNeurons][1];
+		spreadList = new double[numStreams][numInputNeurons];
+		
+		double[][] mins = new double[numStreams][numInputs];
+		double[][] maxs = new double[numStreams][numInputs];
 		
 		// TODO: different mins and maxs should be calculated for each class (input stream)
 		
-		// get mins and maxs of each input parameter
-		for (int i = 0; i < inputs.length; i++) {
-			for (int j = 0; j < inputs[i][0].length; j++) {
-				mins[j] = Math.min(mins[j], inputs[i][0][j]);
-				maxs[j] = Math.max(maxs[j], inputs[i][0][j]);
+		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
+			int streamIndex;
+			for (streamIndex = 0; streamIndex < numStreams; streamIndex++)
+				if (inputs[patternNum][1][streamIndex] > 0.0)
+					break;
+			
+			// get mins and maxs of each input parameter
+			for (int inputNum = 0; inputNum < numInputs; inputNum++){
+				mins[streamIndex][inputNum] = Math.min(mins[streamIndex][inputNum], inputs[patternNum][0][inputNum]);
+				maxs[streamIndex][inputNum] = Math.max(maxs[streamIndex][inputNum], inputs[patternNum][0][inputNum]);
 			}
+			
 		}
 		
-		// construct centers by uniformly splitting min-max range of each input into *rules* number of pieces
-		// could be done using k-means as well
-		int layer1Index = 0;
-		for (int i = 0; i < inputs[0][0].length; i++) {
-			double size = maxs[i] - mins[i];
-			double stepSize = size / (rules * 2);
-			double dmax = stepSize * 2;
-			for (int j = 1; j < (rules * 2); j+=2) {
-				// duplicate centers for each network stream
-				for (int k = 0; k < inputs[0][1].length; k++) {
-					centers[k][layer1Index][0] = mins[i] + j * stepSize;
-					spreadList[k][layer1Index++] = dmax / Math.sqrt(rules);
+		for (int streamNum = 0; streamNum < numStreams; streamNum++) {
+			for (int inputNum = 0; inputNum < numInputs; inputNum++) {
+				double min = mins[streamNum][inputNum];
+				double max = maxs[streamNum][inputNum];
+				double step = (max - min) / (rules + 1);
+				for (int ruleNum = 0; ruleNum < rules; ruleNum++) {
+					centers[streamNum][inputNum * rules + ruleNum][0] = min + step * (ruleNum + 1);
+					double dmax = (max - min) - (step * 2);
+					spreadList[streamNum][inputNum * rules + ruleNum] = dmax / Math.sqrt(rules); 
 				}
 			}
 		}
