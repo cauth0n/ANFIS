@@ -1,7 +1,5 @@
 package LinearAlgebra;
 
-// currently unused
-
 public class Vector {
 	
 	protected double[] vector;
