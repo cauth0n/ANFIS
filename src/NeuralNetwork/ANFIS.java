@@ -22,7 +22,7 @@ public class ANFIS extends Network {
 	 * Changes to the default Neural Network are modified here.
 	 */
 	public ANFIS() {
-		rate = 3.0;   // ???
+		rate = 3.0;
 		rules = 2;
 	}
 	
@@ -259,20 +259,18 @@ public class ANFIS extends Network {
 		return out;
 	}
 	
-	
-	
 	/**
-	 * Enforces pattern by disallowing activation functions to be set for RBFs.
+	 * Enforces pattern by disallowing activation functions to be set for ANFIS networks.
 	 */
 	public void setActivationFunctions(FunctionType[] fts) {
-		throw new IllegalArgumentException("Cannot specify activation functions for RBFs.");
+		throw new IllegalArgumentException("Cannot specify activation functions for ANFIS networks.");
 	}
 	
 	/**
-	 * Enforces pattern by disallowing hidden layers to be set for RBFs.
+	 * Enforces pattern by disallowing hidden layers to be set for ANFIS networks.
 	 */
 	public void setHiddenLayers(int[] size, FunctionType ft) {
-		throw new IllegalArgumentException("Cannot specify hidden layers for RBFs.");
+		throw new IllegalArgumentException("Cannot specify hidden layers for ANFIS networks.");
 	}
 
 }
