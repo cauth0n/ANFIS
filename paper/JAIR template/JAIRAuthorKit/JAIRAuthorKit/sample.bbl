@@ -1,0 +1,83 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\BCAY{Adorf\ \BBA\ Johnston}{Adorf\ \BBA\
+  Johnston}{1990}]{adorf}
+Adorf, H.\BBACOMMA\  \BBA\ Johnston, M. \BBOP1990\BBCP.
+\newblock \BBOQ A discrete stochastic neural network algorithm for constraint
+  satisfaction problems\BBCQ\
+\newblock In {\Bem Proceedings of the International Joint Conference on Neural
+  Networks}.
+
+\bibitem[\protect\BCAY{Brassard\ \BBA\ Bratley}{Brassard\ \BBA\
+  Bratley}{1988}]{brassard}
+Brassard, G.\BBACOMMA\  \BBA\ Bratley, P. \BBOP1988\BBCP.
+\newblock {\Bem Algorithmics - Theory and Practice}.
+\newblock Englewood Cliffs, NJ: Prentice Hall.
+
+\bibitem[\protect\BCAY{Ginsberg\ \BBA\ Harvey}{Ginsberg\ \BBA\
+  Harvey}{1990}]{ginsberg}
+Ginsberg, M.\BBACOMMA\  \BBA\ Harvey, W. \BBOP1990\BBCP.
+\newblock \BBOQ Iterative broadening\BBCQ\
+\newblock In {\Bem Proceedings of AAAI-91}.
+
+\bibitem[\protect\BCAY{Hopfield}{Hopfield}{1982}]{hopfield}
+Hopfield, J. \BBOP1982\BBCP.
+\newblock \BBOQ Neural networks and physical systems with emergent collective
+  computational abilities\BBCQ\
+\newblock In {\Bem Proceedings of the National Academy of Sciences},
+  \lowercase{\BVOL}~79. Washington, DC: National Academy Press.
+
+\bibitem[\protect\BCAY{Johnson, Papadimitrou,\ \BBA\ Yannakakis}{Johnson
+  et~al.}{1988}]{papad}
+Johnson, D., Papadimitrou, C., \BBA\ Yannakakis, M. \BBOP1988\BBCP.
+\newblock \BBOQ How easy is local search?\BBCQ\
+\newblock {\Bem Journal of Computer and System Sciences}, {\Bem 37}, 79--100.
+
+\bibitem[\protect\BCAY{Johnston}{Johnston}{1987}]{mj-early}
+Johnston, M. \BBOP1987\BBCP.
+\newblock \BBOQ Automated telescope scheduling\BBCQ\
+\newblock In {\Bem Proceedings of the Symposium on Coordination of
+  Observational Projects}.
+
+\bibitem[\protect\BCAY{Johnston\ \BBA\ Adorf}{Johnston\ \BBA\
+  Adorf}{1989}]{johnston}
+Johnston, M.\BBACOMMA\  \BBA\ Adorf, H. \BBOP1989\BBCP.
+\newblock \BBOQ Learning in stochastic neural networks for constraint
+  satisfaction problems\BBCQ\
+\newblock In {\Bem Proceedings of NASA Conference on Space Telerobotics},
+  \lowercase{\BVOL}~37.
+
+\bibitem[\protect\BCAY{Langley}{Langley}{1992}]{langley}
+Langley, P. \BBOP1992\BBCP.
+\newblock \BBOQ Systematic and nonsystematic search strategies\BBCQ\
+\newblock In {\Bem Proceedings of AAAI-92}.
+
+\bibitem[\protect\BCAY{Minton, Johnston, Philips,\ \BBA\ Laird}{Minton
+  et~al.}{1990}]{min-aaai}
+Minton, S., Johnston, M., Philips, A., \BBA\ Laird, P. \BBOP1990\BBCP.
+\newblock \BBOQ Solving large scale constraint satisfaction and scheduling
+  problems using a heuristic repair method\BBCQ\
+\newblock In {\Bem Proceedings of AAAI-90}.
+
+\bibitem[\protect\BCAY{Simmons}{Simmons}{1988}]{simmons-aaai88}
+Simmons, R. \BBOP1988\BBCP.
+\newblock \BBOQ A theory of debugging plans and interpretations\BBCQ\
+\newblock In {\Bem Proceedings of AAAI-88}.
+
+\bibitem[\protect\BCAY{Stone\ \BBA\ Stone}{Stone\ \BBA\ Stone}{1987}]{stones}
+Stone, H.\BBACOMMA\  \BBA\ Stone, J. \BBOP1987\BBCP.
+\newblock \BBOQ Efficient search techniques - an empirical study of the
+  n-queens problem\BBCQ\
+\newblock {\Bem IBM Journal of Research and Development}, {\Bem 31}, 464--474.
+
+\bibitem[\protect\BCAY{Sussman}{Sussman}{1975}]{hacker}
+Sussman, G.~J. \BBOP1975\BBCP.
+\newblock {\Bem A Computer Model of Skill Acquisition}.
+\newblock New York: New American Elsevier.
+
+\bibitem[\protect\BCAY{Waldrop}{Waldrop}{1989}]{sam}
+Waldrop, M. \BBOP1989\BBCP.
+\newblock \BBOQ Will the {H}ubble space telescope compute?\BBCQ\
+\newblock {\Bem Science}, {\Bem 243}, 1437--1439.
+
+\end{thebibliography}

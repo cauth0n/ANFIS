@@ -81,16 +81,6 @@ public class ANFIS extends Network {
 		return centers;
 	}
 	
-	private double maxDistance(double[][] centers) {
-		double dmax = 0.0;
-		for (int i = 0; i < centers.length - 1; i++) {
-			for (int j = i + 1; j < centers.length; j++) {
-				dmax = Math.max(dmax, ops.euclidean(centers[i], centers[j]));
-			}
-		}
-		return dmax;
-	}
-	
 	/**
 	 * Internal helper function used to construct a network structure for an RBF.
 	 * 
