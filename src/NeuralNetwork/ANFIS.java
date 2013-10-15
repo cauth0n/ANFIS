@@ -1,6 +1,7 @@
 package NeuralNetwork;
 
 import java.util.Random;
+import LinearAlgebra.Operations;
 
 public class ANFIS extends Network {
 	
@@ -10,11 +11,7 @@ public class ANFIS extends Network {
 	double[][][] consequentParameters;
 	double consequentParametersMin = -0.3;
 	double consequentParametersMax = 0.3;
-	
-	
-	//Neuron defaultInputNeuron = new Neuron(FunctionType.LINEAR);
-	//Neuron defaultHiddenNeuron = new Neuron(FunctionType.GAUSSIAN);
-	//Neuron defaultOutputNeuron = new Neuron(FunctionType.LINEAR);
+	Operations ops = new Operations();
 	
 	Neuron defaultLayer1Neuron = new Neuron(FunctionType.GAUSSIAN);
 	
@@ -54,8 +51,6 @@ public class ANFIS extends Network {
 		double[][] mins = new double[numStreams][numInputs];
 		double[][] maxs = new double[numStreams][numInputs];
 		
-		// TODO: different mins and maxs should be calculated for each class (input stream)
-		
 		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
 			int streamIndex;
 			for (streamIndex = 0; streamIndex < numStreams; streamIndex++)
@@ -90,7 +85,7 @@ public class ANFIS extends Network {
 		double dmax = 0.0;
 		for (int i = 0; i < centers.length - 1; i++) {
 			for (int j = i + 1; j < centers.length; j++) {
-				dmax = Math.max(dmax, euclidean(centers[i], centers[j]));
+				dmax = Math.max(dmax, ops.euclidean(centers[i], centers[j]));
 			}
 		}
 		return dmax;
@@ -105,10 +100,14 @@ public class ANFIS extends Network {
 		
 		Layers.clear();
 		
+		// List of Layer1 objects corresponding to the different streams or outputs
 		Layer1List = new Layer[inputs[0][1].length];
 		for (int i = 0; i < Layer1List.length; i++)
 			Layer1List[i] = new Layer(defaultLayer1Neuron, inputs[0][0].length * rules, null);
 		
+		
+		// Network is traversed in run code, so Layers is not actually used
+		// The following is strictly for displaying the network structure in the "describe" function
 		Layers.add(Layer1List[0]);
 		Neuron linearNeuron = new Neuron(FunctionType.LINEAR);
 		Layers.add(new Layer(linearNeuron, rules, null));
@@ -116,10 +115,10 @@ public class ANFIS extends Network {
 		Layers.add(new Layer(linearNeuron, rules, null));
 		Layers.add(new Layer(linearNeuron, inputs[0][1].length, null));
 		
+		// initialize all consequent parameters for each stream to small decimal values
 		consequentParameters = new double[inputs[0][1].length][rules][inputs[0][0].length + 1];
 		initializeParams(consequentParameters);
 		
-		describe();
 	}
 	
 	/**
@@ -127,100 +126,55 @@ public class ANFIS extends Network {
 	 * inputs[example_index][0] = array of input values
 	 * inputs[example_index][1] = array of output values
 	 */
-	public void train(double[][][] inputs) {
-		centersList = calculateCentersRanges(inputs);
-		constructNetwork(inputs);
+	public void train(double[][][] data) {
 		
-		double maxOutput = 0.0;
-		for (int in = 0; in < inputs.length; in++)
-			for (int out = 0; out < inputs[in][1].length; out++)
-				maxOutput = Math.max(Math.abs(inputs[in][1][out]), maxOutput);
+		// first think, calculate the centers by evenly partitioning
+		// the range of each input with respect to outputs
+		centersList = calculateCentersRanges(data);
 		
-		// scale activation functions based on inputs
-		//for (Layer layer : Layers)
-		//	layer.scaleFunctions(maxOutput/4);
+		// construct the network, using the dimension of inputs and outputs
+		// to determine input layer size and number of streams
+		constructNetwork(data);
 		
+		// loop through the input/output patterns and train on each
 		int percent = -1;
-		
-		for (int in = 0; in < inputs.length && in < maxInputs; in++) {
-			double[][] datapoint = inputs[in];
+		for (int in = 0; in < data.length && in < maxInputs; in++) {
 			
-			if (echo == true && percent != (int) (100*((float)in/inputs.length))) {
-				percent = (int) (100*((float)in/inputs.length));
+			double[][] datapoint = data[in];
+			
+			// if echo flag is set to true, print the percentage load bar
+			if (echo == true && percent != (int) (100*((float)in/data.length))) {
+				percent = (int) (100*((float)in/data.length));
 				System.out.println(percent+"%");
 			}
 			
+			// get target value for current example and initialize results
 			double[] targets = datapoint[1];
 			double[] results = new double[targets.length];
 			
+			// train on current example until error is small enough or max iterations exceeded
 			maxError = Double.MAX_VALUE;
-			int it;
-			for (it = 0; maxError > stopError && it < maxIterations; it++) {
-				results = run(datapoint[0]);
-				backpropagate(targets, results);
-				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);
+			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
+				
+				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
+				backpropagate(targets, results);  // backpropogate to train premise params
+				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
 				
 			}
-			
-			/*
-			for (int i = 0; i < targets.length; i++)
-				System.out.printf("%5s",targets[i]);
-			System.out.println("");
-			for (int i = 0; i < results.length; i++)
-				System.out.printf("%5s",results[i]);
-			System.out.println("\n");
-			*/
 			
 		}
 	}
 	
 	/**
-	 * A simplified version of the backprop algorithm to be used by the train function.
-	 * Error is propogated from the output layer back to the input layer.
+	 * Backward propogate error from output to premise parameters for each stream.
 	 * 
 	 * @param targets	The target values of the network.
 	 * @param results	The actual results of the network.
 	 */
 	private void backpropagate(double[] targets, double[] results) {
 		
-		// UPDATE PREMISE PARAMS WITH GRADIENT DESCENT
 		
-		for (int j = 0; j < results.length; j++) {
-			
-			double diff = (targets[j] - results[j]);
-			maxError = Math.max(maxError, Math.pow(diff, 2));
-			
-			Layer layer = Layer1List[j];
-			
-			for (int k = 0; k < Layer1List[j].size(); k++) {
-				double update = -1 * rate * Layer1List[j].getNeuron(k).output * diff;
-				spreadList[j][k] += update;
-			}
-			
-		}
 		
-		/*
-		int outIndex = (Layers.size() - 1);
-		Layer output = Layers.get(outIndex);
-		Layer hidden = Layers.get(outIndex - 1);
-		double[][] errors = new double[Layers.size()][];
-		double change = 0.0;
-		maxError = 0.0;
-		
-		// update output layer
-		errors[outIndex] = new double[output.size()];
-		for (int j = 0; j < output.size(); j++) {
-			double diff = (targets[j] - results[j]);
-			maxError = Math.max(maxError, Math.pow(diff, 2));
-			errors[outIndex][j] = (output.getNeuron(j).gradient() * diff);
-			for (int k = 0; k < hidden.size(); k++) {
-				double update = (rate * hidden.getNeuron(k).output * errors[outIndex][j]);
-				output.weights[j][k] += update;
-				output.oldWeights[j][k] = update;
-				change = Math.max(change, Math.abs(update));
-			}
-		}
-		*/
 	}
 	
 	/**
@@ -230,10 +184,13 @@ public class ANFIS extends Network {
 	 * @return			The output values returned by the output layer.
 	 */
 	public double[] run(double inputs[]) {
+		
+		// validate input dimensions
 		if (inputs.length * rules != Layers.get(0).size())
 			throw new IllegalArgumentException("Inputs must match input layer size." +
 											   "Expected " + Layers.get(0).size() / rules + ", found " + inputs.length + ".");
 		
+		// run input through each stream of network and retrieve a results vector
 		double[] outputs = new double[Layer1List.length];
 		for (int i = 0; i < Layer1List.length; i++)
 			outputs[i] = runSingleOutput(inputs, Layer1List[i], centersList[i], spreadList[i], consequentParameters[i]);
@@ -241,53 +198,69 @@ public class ANFIS extends Network {
 		return outputs;
 	}
 	
+	/**
+	 * Runs an input through a single stream of the network, resulting in a scalar output.
+	 * 
+	 * @param inputs
+	 * @param Layer1
+	 * @param centers
+	 * @param spread
+	 * @param consequentParams
+	 * @return	The scalar output of the stream, bounded by range [0,1]
+	 */
 	private double runSingleOutput(double[] inputs, Layer Layer1, double[][] centers, double[] spread, double[][] consequentParams) {
 		
-		// feed inputs to layer 1
+		// LAYER 1: Gaussian activation functions
 		double[] inputLayer1 = new double[inputs.length * rules];
+		// pass input to each connected node in layer 1
 		for (int i = 0; i < inputs.length; i++)
 			for (int j = 0; j < rules; j++)
 				inputLayer1[i * rules + j] = inputs[i];
+		// run input on each activation function in layer 1 to retrieve output vector
 		double[] outputLayer1 = new double[inputLayer1.length];
 		for (int i = 0; i < Layer1.size(); i++) {
-			outputLayer1[i] = Layer1.getNeuron(i).fire(norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
-			System.out.print(inputLayer1[i]+"=>"+outputLayer1[i]+" ");
+			outputLayer1[i] = Layer1.getNeuron(i).fire(ops.norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
 		}
-		System.out.println("");
 
-		// create product of rules at layer 2
+		// LAYER 2: create product of rules
 		double[] outputLayer2 = new double[rules];
 		for (int i = 0; i < outputLayer1.length; i++) {
 			int index = i % rules;
 			if (index == 0)
-				outputLayer2[index] = outputLayer1[i];
+				outputLayer2[index] = outputLayer1[i];	// initialize each product to first input's neurons
 			else
-				outputLayer2[index] *= outputLayer1[i];
+				outputLayer2[index] *= outputLayer1[i];  // multiply each product by corresponding neurons for the rest of the inputs
 		}
 		double[] inputLayer3 = outputLayer2;
 		
-		// normalize inputs at layer 3
+		// LAYER 3: normalize inputs
 		double[] outputLayer3 = new double[rules];
 		double layer3Sum = 0.0;
+		// sum up all inputs to layer 3
 		for (int i = 0; i < inputLayer3.length; i++)
 			layer3Sum += inputLayer3[i];
+		// divide each input by the sum, thus normalizing
 		for (int i = 0; i < inputLayer3.length; i++)
 			outputLayer3[i] = inputLayer3[i] / layer3Sum;
 		
-		// feed normalized results to layer 4
+		// LAYER 4: linear function of inputs
 		double[] outputLayer4 = new double[rules];
 		for (int i = 0; i < outputLayer4.length; i++) {
-			// (p_i*x + q_i*y + r_i)
+			
+			// construct linear eqn in the form: (p_i*x + q_i*y + r_i)
 			double ruleSum = 0.0;
 			for (int j = 0; j < inputs.length; j++) {
 				ruleSum += consequentParams[i][j] * inputs[j];
 			}
 			ruleSum += consequentParams[i][inputs.length]; // bias, or something similar
+			
 			// w_i * ruleSum (weight of rule)
+			// w_i * (p_i*x + q_i*y + r_i)
 			outputLayer4[i] = outputLayer3[i] * ruleSum;
+			
 		}
 		
-		// sum the inputs in layer 5
+		// LAYER 5: sum the inputs
 		double out = 0.0;
 		for (int i = 0; i < outputLayer4.length; i++) {
 			out += outputLayer4[i];
@@ -296,69 +269,7 @@ public class ANFIS extends Network {
 		return out;
 	}
 	
-	/**
-	 * The default norm of two vectors (euclidean). 
-	 * 
-	 * @param X	The x vector.
-	 * @param Y	The y vector.
-	 * @return	The normed vector.
-	 */
-	protected double norm(double[] X, double[] Y) {
-		return euclidean(X, Y);
-	}
 	
-	/**
-	 * The manhattan norm of two vectors. 
-	 * 
-	 * @param X	The x vector.
-	 * @param Y	The y vector.
-	 * @return	The normed vector.
-	 */
-	protected double manhattan(double[] X, double[] Y) {
-		return LPNorm(X, Y, 1);
-	}
-	
-	/**
-	 * The euclidean norm of two vectors.
-	 * 
-	 * @param X	The x vector.
-	 * @param Y	The y vector.
-	 * @return	The normed vector.
-	 */
-	protected double euclidean(double[] X, double[] Y) {
-		return LPNorm(X, Y, 2);
-	}
-	
-	/**
-	 * The max coordinant norm of two vectors.
-	 * 
-	 * @param X	The x vector.
-	 * @param Y	The y vector.
-	 * @return	The normed vector.
-	 */
-	protected double maxCoordDist(double[] X, double[] Y) {
-		double max = 0.0;
-		for (double x : X)
-			for (double y : Y)
-				max = Math.max(max, Math.abs(x - y));
-		return max;
-	}
-	
-	/**
-	 * A p-norm of two vectors.
-	 * 
-	 * @param X	The x vector.
-	 * @param Y	The y vector.
-	 * @param p The p value of the norm to be taken.
-	 * @return	The normed vector.
-	 */
-	protected double LPNorm(double[] X, double[] Y, int p) {
-		double sum = 0.0;
-		for (int i = 0; i < X.length; i++)
-			sum += Math.pow((X[i] - Y[i]), p);
-		sum = Math.pow(sum, 1.0/p);
-		return sum;
-	}
 	
 	/**
 	 * Enforces pattern by disallowing activation functions to be set for RBFs.
