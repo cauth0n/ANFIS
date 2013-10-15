@@ -1,6 +1,47 @@
 package LinearAlgebra;
 
 public class Operations {
+	
+	/**
+	 * Transposes an MxN matrix.
+	 * 
+	 * @param matrix	The matrix to be transposed.
+	 * @return			The new, transposed matrix.
+	 */
+	public double[][] transpose(double[][] matrix) {
+		int m = matrix.length;
+		int n = matrix[0].length;
+		double[][] transposed = new double[n][m];
+		for (int i = 0; i < m; i++)
+			for (int j = 0; j < n; j++)
+				transposed[i][j] = matrix[j][i];
+		return matrix;
+	}
+	
+	public double[] getRow(double[][] matrix, int i) {
+		return matrix[i];
+	}
+	
+	public double[] getColumn(double[][] matrix, int i) {
+		return transpose(matrix)[i];	// inefficient, don't care for now. not even sure if it will be used.
+	}
+	
+	/**
+	 * Returns the maximum distance between a set of vectors.
+	 * 
+	 * @param vectors	An array of vectors.
+	 * @return			The maximum distance between two vectors in the set.
+	 */
+	public double maxDistance(double[][] vectors) {
+		// note: should use an enum to select norm function?
+		double dmax = 0.0;
+		for (int i = 0; i < vectors.length - 1; i++) {
+			for (int j = i + 1; j < vectors.length; j++) {
+				dmax = Math.max(dmax, euclidean(vectors[i], vectors[j]));
+			}
+		}
+		return dmax;
+	}
 
 	/**
 	 * The default norm of two vectors (euclidean). 
