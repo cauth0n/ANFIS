@@ -34,7 +34,7 @@ public class Matrix {
 	 * @param height	The height of the matrix that should be created.
 	 * @param val		The value to be placed in each entry of the matrix.
 	 */
-	public Matrix(int width, int height, double val) {
+	public Matrix(int height, int width, double val) {
 		double[][] matrix = new double[height][width];
 		for (int i = 0; i < matrix.length; i++)
 			for (int j = 0; j < matrix[i].length; j++)
@@ -50,7 +50,6 @@ public class Matrix {
 	private void setMatrix(double[][] matrix) {
 		this.matrix = matrix;
 		this.transpose = ops.transpose(matrix);
-
 	}
 	
 	public double getScalar() {
@@ -69,10 +68,12 @@ public class Matrix {
 		Matrix A = this;
 		if (A.width() != B.height())
 			throw new IllegalArgumentException("Width of matrix A ("+width()+") does not match height of matrix B ("+B.height()+").");
+		
 		Matrix C = new Matrix(A.height(), B.width(), 0.0);
-		for (int i = 0; i < A.height(); i++)
-			for (int j = 0; j < A.width(); j++)
-				C.matrix[i][j] += A.matrix[i][j] * B.matrix[j][i];	// FIXME: I don't think this is right, I need pen and paper for this.
+		for (int i = 0; i < C.height(); i++)
+			for (int j = 0; j < C.width(); j++)
+				for (int k = 0; k < A.width(); k++)
+					C.matrix[i][j] += A.matrix[i][k] * B.matrix[k][j];
 		return C;
 	}
 	
@@ -84,7 +85,6 @@ public class Matrix {
 		}
 		
 		Matrix C = new Matrix(this.height(), B.width(), 0.0);
-		
 		
 		for (int i = 0; i < this.height(); i++){
 			for (int j = 0; j < this.width(); j++){
@@ -194,6 +194,10 @@ public class Matrix {
 			System.out.println();
 		}
 		System.out.println();
+	}
+	
+	public void printDimension() {
+		System.out.println(height()+"x"+width());
 	}
 
 }

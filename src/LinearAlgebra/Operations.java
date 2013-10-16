@@ -28,7 +28,7 @@ public class Operations {
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < m; j++)
 				transposed[i][j] = matrix[j][i];
-		return matrix;
+		return transposed;
 	}
 	
 	public double[] getRow(double[][] matrix, int i) {

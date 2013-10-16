@@ -143,52 +143,46 @@ public class ANFIS extends Network {
 			
 			// get target value for current example and initialize results
 			double[] targets = datapoint[1];
-			double[] results = new double[targets.length];
+			double[] results = run(datapoint[0]);
 			
 			updateS(exampleNum);
-			//updateX(exampleNum, results[0]);
+			updateX(exampleNum, results[0]);
 			
-			// train on current example until error is small enough or max iterations exceeded
-			maxError = Double.MAX_VALUE;
-			break;
+//			// train on current example until error is small enough or max iterations exceeded
+//			maxError = Double.MAX_VALUE;
 //			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
 //				
 //				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
-//				backpropagate(targets, results);  // backpropogate to train premise params
+//				
+//				//backpropagate(targets, results);  // backpropogate to train premise params
+//				
 //				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
 //				
 //			}
 			
 			
 		}
-		S.printMatrix();
+		X.printMatrix();
 	}
 	
 	private void updateS(int exampleNum) {
 		
 		// S' = S - (P3 / 1 + Q2)
-	
-
 		
 		Matrix ARow = A.getRow(exampleNum);
-		Matrix ARowTranpose = ARow.getTranspose();
+		Matrix ARowTranspose = ARow.getTranspose();
 		
-//		ARow.printMatrix();
-//		System.out.println();
-//		ARowTranpose.printMatrix();
-		
-		Matrix P1 = S.multiply(ARowTranpose);
+		Matrix P1 = S.multiply(ARowTranspose);
 		Matrix P2 = P1.multiply(ARow);
 		Matrix P3 = P2.multiply(S);
 		
-		Matrix Q1 = ARowTranpose.multiply(S);
-		Matrix Q2 = Q1.multiply(ARow);
+		Matrix Q1 = ARow.multiply(S);
+		Matrix Q2 = Q1.multiply(ARowTranspose);
 		
 		double denominator = 1 + Q2.getScalar();
 		
 		Matrix combinedFraction = P3.scalarDivide(denominator);
 		Matrix newS = S.subtract(combinedFraction);
-		
 		
 		S = newS;
 	}

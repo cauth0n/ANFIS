@@ -93,7 +93,7 @@ public class TrainTest {
 		System.out.print(correct+"\t");
 		System.out.print(trainTime+"\t");
 		System.out.println("\n");
-		nn.printConfusionMatrix(categories);
+		//nn.printConfusionMatrix(categories);
 		
 	}
 	
