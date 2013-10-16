@@ -7,6 +7,7 @@ import LinearAlgebra.Operations;
 
 public class ANFIS extends Network {
 	
+	Random r = new Random(11235);
 	double[][][] centersList;
 	double[][] spreadList;
 	int rules;
@@ -16,8 +17,8 @@ public class ANFIS extends Network {
 	double gamma = 11235;
 	Operations ops = new Operations();
 	Matrix A;
-	Matrix S;
-	Matrix X;
+	Matrix[] SList;
+	Matrix[] XList;
 	
 	Neuron defaultLayer1Neuron = new Neuron(FunctionType.GAUSSIAN);
 	
@@ -36,7 +37,6 @@ public class ANFIS extends Network {
 	 * Internal helper function used to initialize parameters to small random numbers.
 	 */
 	private void initializeParams(double[][][] params) {
-		Random r = new Random(11235);
 		for (int i = 0; i < params.length; i++) {
 			for (int j = 0; j < params[i].length; j++)
 				for (int k = 0; k < params[i][j].length; k++)
@@ -132,11 +132,8 @@ public class ANFIS extends Network {
 		// to determine input layer size and number of streams
 		constructNetwork(data);
 		buildMatrices(data);
-		System.out.println();
-		//S.printMatrix();
 		
 		// loop through the input/output patterns and train on each
-		int percent = -1;
 		for (int exampleNum = 0; exampleNum < data.length && exampleNum < maxInputs; exampleNum++) {
 			
 			double[][] datapoint = data[exampleNum];
@@ -145,69 +142,89 @@ public class ANFIS extends Network {
 			double[] targets = datapoint[1];
 			double[] results = run(datapoint[0]);
 			
-			updateS(exampleNum);
-			updateX(exampleNum, results[0]);
+			// FIXME: Why is results[4] returning NaN and rest are fine?
+			// FIXME: results are all zero if X (consequent params) start as zero as they should
 			
-//			// train on current example until error is small enough or max iterations exceeded
-//			maxError = Double.MAX_VALUE;
-//			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
-//				
-//				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
-//				
-//				//backpropagate(targets, results);  // backpropogate to train premise params
-//				
-//				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
-//				
-//			}
+			//Matrix m = new Matrix(results);
+			//m.printMatrix();
+			
+			updateSList(exampleNum);
+			updateXList(exampleNum, results);
+			
+			/*
+			// train on current example until error is small enough or max iterations exceeded
+			maxError = Double.MAX_VALUE;
+			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
+				
+				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
+				
+				//backpropagate(targets, results);  // backpropogate to train premise params
+				
+				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
+				
+			}
+			*/
 			
 			
 		}
-		X.printMatrix();
+		
 	}
 	
-	private void updateS(int exampleNum) {
-		
-		// S' = S - (P3 / 1 + Q2)
+	private void updateSList(int exampleNum) {
 		
 		Matrix ARow = A.getRow(exampleNum);
 		Matrix ARowTranspose = ARow.getTranspose();
 		
-		Matrix P1 = S.multiply(ARowTranspose);
-		Matrix P2 = P1.multiply(ARow);
-		Matrix P3 = P2.multiply(S);
+		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
+			
+			Matrix P1 = SList[streamNum].multiply(ARowTranspose);
+			Matrix P2 = P1.multiply(ARow);
+			Matrix P3 = P2.multiply(SList[streamNum]);
+			
+			Matrix Q1 = ARow.multiply(SList[streamNum]);
+			Matrix Q2 = Q1.multiply(ARowTranspose);
+			
+			double denominator = 1 + Q2.getScalar();
+			
+			Matrix combinedFraction = P3.scalarDivide(denominator);
+			Matrix newS = SList[streamNum].subtract(combinedFraction);
+			
+			SList[streamNum] = newS;
+			
+		}
 		
-		Matrix Q1 = ARow.multiply(S);
-		Matrix Q2 = Q1.multiply(ARowTranspose);
-		
-		double denominator = 1 + Q2.getScalar();
-		
-		Matrix combinedFraction = P3.scalarDivide(denominator);
-		Matrix newS = S.subtract(combinedFraction);
-		
-		S = newS;
 	}
 	
-	private void updateX(int exampleNum, double result) {
-		
+	private void updateXList(int exampleNum, double[] results) {
+			
 		Matrix ARow = A.getRow(exampleNum);
 		Matrix ARowTranpose = ARow.getTranspose();
-		
-		Matrix P1 = ARow.multiply(X);
-		double rhs = result - P1.getScalar();
-		
-		Matrix Q1 = S.multiply(ARowTranpose);
-		Matrix Q2 = Q1.scalarMultiply(rhs);
-		
-		
-		Matrix newX = X.add(Q2);
-		X = newX;
-		
+			
+		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
+			
+			for (int pathNum = 0; pathNum < XList[streamNum].width(); pathNum++) {
+			
+				Matrix P1 = ARow.multiply(XList[streamNum].getColumn(pathNum));
+				
+				double rhs = results[streamNum] - P1.getScalar();
+				
+				Matrix Q1 = SList[streamNum].multiply(ARowTranpose);
+				Matrix Q2 = Q1.scalarMultiply(rhs);
+				
+				Matrix newX = XList[streamNum].getColumn(pathNum).add(Q2);
+				
+				XList[streamNum].setColumn(pathNum, newX);
+				
+			}
+				
+		}
+			
 	}
 	
 	private void buildMatrices(double[][][] data) {
 		buildA(data);
-		buildS();
-		buildX();
+		buildSList(data[0][1].length);
+		buildXList(data[0][1].length);
 	}
 	
 	private void buildA(double[][][] data) {
@@ -221,12 +238,24 @@ public class ANFIS extends Network {
 		A = new Matrix(inputs);
 	}
 	
-	private void buildS() {
-		S = new Matrix(ops.getIdentity(A.width())).scalarMultiply(gamma);
+	private void buildSList(int size) {
+		SList = new Matrix[size];
+		for (int i = 0; i < SList.length; i++)
+			SList[i] = new Matrix(ops.getIdentity(A.width())).scalarMultiply(gamma);
 	}
 	
-	private void buildX() {
-		X = new Matrix(new double[A.width()]);
+	private void buildXList(int size) {
+		XList = new Matrix[size];
+		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
+			double[][] mat = new double[A.width()][rules];
+			for (int i = 0; i < mat.length; i++) {
+				for (int j = 0; j < mat[i].length; j++) {
+					mat[i][j] = consequentParametersMin + (consequentParametersMax - consequentParametersMin) * r.nextDouble();
+				}
+			}
+			// FIXME: Initializing to random vals because run produced zero results if X was initialized to zeros (which it should be)
+			XList[streamNum] = new Matrix(mat);
+		}
 	}
 	
 	/**
@@ -256,8 +285,12 @@ public class ANFIS extends Network {
 		
 		// run input through each stream of network and retrieve a results vector
 		double[] outputs = new double[Layer1List.length];
-		for (int i = 0; i < Layer1List.length; i++)
-			outputs[i] = runSingleOutput(inputs, Layer1List[i], centersList[i], spreadList[i], consequentParameters[i]);
+		for (int streamNum = 0; streamNum < Layer1List.length; streamNum++)
+			outputs[streamNum] = runSingleOutput(inputs, 
+												Layer1List[streamNum], 
+												centersList[streamNum], 
+												spreadList[streamNum], 
+												XList[streamNum].getTranspose().toPrimitive());
 		
 		return outputs;
 	}
@@ -309,18 +342,18 @@ public class ANFIS extends Network {
 		
 		// LAYER 4: linear function of inputs
 		double[] outputLayer4 = new double[rules];
-		for (int i = 0; i < outputLayer4.length; i++) {
+		for (int pathNum = 0; pathNum < outputLayer4.length; pathNum++) {
 			
 			// construct linear eqn in the form: (p_i*x + q_i*y + r_i)
 			double ruleSum = 0.0;
 			for (int j = 0; j < inputs.length; j++) {
-				ruleSum += consequentParams[i][j] * inputs[j];
+				ruleSum += consequentParams[pathNum][j] * inputs[j];
 			}
-			ruleSum += consequentParams[i][inputs.length]; // bias, or something similar
+			ruleSum += consequentParams[pathNum][inputs.length]; // bias, or something similar
 			
 			// w_i * ruleSum (weight of rule)
 			// w_i * (p_i*x + q_i*y + r_i)
-			outputLayer4[i] = outputLayer3[i] * ruleSum;
+			outputLayer4[pathNum] = outputLayer3[pathNum] * ruleSum;
 			
 		}
 		

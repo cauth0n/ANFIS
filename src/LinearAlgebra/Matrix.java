@@ -182,6 +182,15 @@ public class Matrix {
 		return new Matrix(transpose[i]);
 	}
 	
+	public void setColumn(int index, Matrix col) {
+		if (col.height() != height() || col.width() != 1)
+			throw new IllegalArgumentException("Invalid column dimension.");
+		if (index > width())
+			throw new IllegalArgumentException("Invalid column selection, only "+width()+" available.");
+		for (int i = 0; i < col.height(); i++)
+			matrix[i][index] = col.matrix[i][0];
+	}
+	
 	public Matrix getTranspose() {
 		return new Matrix(transpose);
 	}
@@ -198,6 +207,10 @@ public class Matrix {
 	
 	public void printDimension() {
 		System.out.println(height()+"x"+width());
+	}
+	
+	public double[][] toPrimitive() {
+		return matrix;
 	}
 
 }
