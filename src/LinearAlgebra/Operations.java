@@ -2,6 +2,19 @@ package LinearAlgebra;
 
 public class Operations {
 	
+	public double[][] getIdentity(int size) {
+		double[][] ident = new double[size][size];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (i == j)
+					ident[i][j] = 1.0;
+				else
+					ident[i][j] = 0.0;
+			}
+		}
+		return ident;
+	}
+	
 	/**
 	 * Transposes an MxN matrix.
 	 * 
@@ -12,8 +25,8 @@ public class Operations {
 		int m = matrix.length;
 		int n = matrix[0].length;
 		double[][] transposed = new double[n][m];
-		for (int i = 0; i < m; i++)
-			for (int j = 0; j < n; j++)
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < m; j++)
 				transposed[i][j] = matrix[j][i];
 		return matrix;
 	}

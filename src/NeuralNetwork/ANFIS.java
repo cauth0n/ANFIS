@@ -1,6 +1,8 @@
 package NeuralNetwork;
 
 import java.util.Random;
+
+import LinearAlgebra.Matrix;
 import LinearAlgebra.Operations;
 
 public class ANFIS extends Network {
@@ -11,7 +13,11 @@ public class ANFIS extends Network {
 	double[][][] consequentParameters;
 	double consequentParametersMin = -0.3;
 	double consequentParametersMax = 0.3;
+	double gamma = 11235;
 	Operations ops = new Operations();
+	Matrix A;
+	Matrix S;
+	Matrix X;
 	
 	Neuron defaultLayer1Neuron = new Neuron(FunctionType.GAUSSIAN);
 	
@@ -125,34 +131,108 @@ public class ANFIS extends Network {
 		// construct the network, using the dimension of inputs and outputs
 		// to determine input layer size and number of streams
 		constructNetwork(data);
+		buildMatrices(data);
+		System.out.println();
+		//S.printMatrix();
 		
 		// loop through the input/output patterns and train on each
 		int percent = -1;
-		for (int in = 0; in < data.length && in < maxInputs; in++) {
+		for (int exampleNum = 0; exampleNum < data.length && exampleNum < maxInputs; exampleNum++) {
 			
-			double[][] datapoint = data[in];
-			
-			// if echo flag is set to true, print the percentage load bar
-			if (echo == true && percent != (int) (100*((float)in/data.length))) {
-				percent = (int) (100*((float)in/data.length));
-				System.out.println(percent+"%");
-			}
+			double[][] datapoint = data[exampleNum];
 			
 			// get target value for current example and initialize results
 			double[] targets = datapoint[1];
 			double[] results = new double[targets.length];
 			
+			updateS(exampleNum);
+			//updateX(exampleNum, results[0]);
+			
 			// train on current example until error is small enough or max iterations exceeded
 			maxError = Double.MAX_VALUE;
-			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
-				
-				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
-				backpropagate(targets, results);  // backpropogate to train premise params
-				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
-				
-			}
+			break;
+//			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
+//				
+//				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
+//				backpropagate(targets, results);  // backpropogate to train premise params
+//				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
+//				
+//			}
+			
 			
 		}
+		S.printMatrix();
+	}
+	
+	private void updateS(int exampleNum) {
+		
+		// S' = S - (P3 / 1 + Q2)
+	
+
+		
+		Matrix ARow = A.getRow(exampleNum);
+		Matrix ARowTranpose = ARow.getTranspose();
+		
+//		ARow.printMatrix();
+//		System.out.println();
+//		ARowTranpose.printMatrix();
+		
+		Matrix P1 = S.multiply(ARowTranpose);
+		Matrix P2 = P1.multiply(ARow);
+		Matrix P3 = P2.multiply(S);
+		
+		Matrix Q1 = ARowTranpose.multiply(S);
+		Matrix Q2 = Q1.multiply(ARow);
+		
+		double denominator = 1 + Q2.getScalar();
+		
+		Matrix combinedFraction = P3.scalarDivide(denominator);
+		Matrix newS = S.subtract(combinedFraction);
+		
+		
+		S = newS;
+	}
+	
+	private void updateX(int exampleNum, double result) {
+		
+		Matrix ARow = A.getRow(exampleNum);
+		Matrix ARowTranpose = ARow.getTranspose();
+		
+		Matrix P1 = ARow.multiply(X);
+		double rhs = result - P1.getScalar();
+		
+		Matrix Q1 = S.multiply(ARowTranpose);
+		Matrix Q2 = Q1.scalarMultiply(rhs);
+		
+		
+		Matrix newX = X.add(Q2);
+		X = newX;
+		
+	}
+	
+	private void buildMatrices(double[][][] data) {
+		buildA(data);
+		buildS();
+		buildX();
+	}
+	
+	private void buildA(double[][][] data) {
+		double[][] inputs = new double[data.length][data[0][0].length + 1];
+		for (int exampleNum = 0; exampleNum < inputs.length; exampleNum++) {
+			for (int featureNum = 0; featureNum < inputs[exampleNum].length - 1; featureNum++) {
+				inputs[exampleNum][featureNum] = data[exampleNum][0][featureNum];
+			}
+			inputs[exampleNum][inputs[exampleNum].length - 1] = 1;
+		}
+		A = new Matrix(inputs);
+	}
+	
+	private void buildS() {
+		S = new Matrix(ops.getIdentity(A.width())).scalarMultiply(gamma);
+	}
+	
+	private void buildX() {
+		X = new Matrix(new double[A.width()]);
 	}
 	
 	/**

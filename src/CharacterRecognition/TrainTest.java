@@ -49,9 +49,9 @@ public class TrainTest {
 		
 		// RBF: 74% (rate = 3.0; spread *= 0.5;)
 		// MLP: 91% 22s (rate = 0.002; {100}
-		trainData = parserOpticalDigitsTrain.getData();
-		testData = parserOpticalDigitsTest.getData();
-		categories = parserOpticalDigitsTest.getCategories();
+//		trainData = parserOpticalDigitsTrain.getData();
+//		testData = parserOpticalDigitsTest.getData();
+//		categories = parserOpticalDigitsTest.getCategories();
 		
 		// RBF: 66% (rate = 3.0; spread *= 0.4;)
 		// MLP: 78% (rate = 0.002; {64}
@@ -76,13 +76,12 @@ public class TrainTest {
 		// create function generators
 		Network nn;
 		
-		nn = new MLP();  // creates a new MLP network
-		nn.setHiddenLayers(new int[]{100}, FunctionType.TANH);
-		//nn.setActivationFunctions(new FunctionType[]{FunctionType.LINEAR,FunctionType.TANH,FunctionType.TANH});
+		//nn = new MLP();  // creates a new MLP network
+		//nn.setHiddenLayers(new int[]{100}, FunctionType.TANH);
 		
 		//nn = new RBF();  // creates a new RBF network
 		
-		//nn = new ANFIS();
+		nn = new ANFIS();
 		
 		long startTime = System.nanoTime();
 		nn.train(trainData);
