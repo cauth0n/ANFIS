@@ -10,7 +10,7 @@ public class ANFIS extends Network {
 	Random r = new Random(11235);
 	double[][][] centersList;
 	double[][] spreadList;
-	int rules;
+	int rules = 10;
 	double[][][] consequentParameters;
 	double consequentParametersMin = -0.3;
 	double consequentParametersMax = 0.3;
@@ -30,7 +30,7 @@ public class ANFIS extends Network {
 	 */
 	public ANFIS() {
 		rate = 3.0;
-		rules = 2;
+		
 	}
 	
 	/**
@@ -167,6 +167,7 @@ public class ANFIS extends Network {
 			
 			
 		}
+		//XList[0].printMatrix();
 		
 	}
 	
