@@ -171,6 +171,8 @@ public class ANFIS extends Network {
 		
 	}
 	
+	
+	//TODO -- comment
 	private void updateSList(int exampleNum) {
 		
 		Matrix ARow = A.getRow(exampleNum);
@@ -196,6 +198,8 @@ public class ANFIS extends Network {
 		
 	}
 	
+	
+	//TODO -- comment
 	private void updateXList(int exampleNum, double[] results) {
 			
 		Matrix ARow = A.getRow(exampleNum);
@@ -254,6 +258,7 @@ public class ANFIS extends Network {
 					mat[i][j] = consequentParametersMin + (consequentParametersMax - consequentParametersMin) * r.nextDouble();
 				}
 			}
+			//When X was initialized to 0, we got all values in the first column filled.
 			// FIXME: Initializing to random vals because run produced zero results if X was initialized to zeros (which it should be)
 			XList[streamNum] = new Matrix(mat);
 		}

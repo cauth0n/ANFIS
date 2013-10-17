@@ -2,6 +2,7 @@ package NeuralNetwork;
 
 import LinearAlgebra.Operations;
 
+
 public class RBF extends Network {
 
 	boolean customCenters = false;
