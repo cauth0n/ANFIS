@@ -49,6 +49,10 @@ public class Matrix {
 	 */
 	private void setMatrix(double[][] matrix) {
 		this.matrix = matrix;
+		setTranspose();
+	}
+	
+	private void setTranspose() {
 		this.transpose = ops.transpose(matrix);
 	}
 	
@@ -74,6 +78,7 @@ public class Matrix {
 			for (int j = 0; j < C.width(); j++)
 				for (int k = 0; k < A.width(); k++)
 					C.matrix[i][j] += A.matrix[i][k] * B.matrix[k][j];
+		C.setTranspose();
 		return C;
 	}
 	
@@ -92,6 +97,8 @@ public class Matrix {
 			}
 		}
 		
+		C.setTranspose();
+		
 		return C;
 	}
 	
@@ -106,6 +113,7 @@ public class Matrix {
 				C.matrix[i][j] = -1 * this.matrix[i][j];
 			}
 		}
+		C.setTranspose();
 		return C;
 	}
 	
@@ -164,7 +172,7 @@ public class Matrix {
 		if (i >= height())
 			throw new IllegalArgumentException("Attempt to access row "+i+". Only "+height()+" rows exist.");
 		double[][] mat = new double[1][matrix[i].length];
-		for (int j = 0; j < matrix[j].length; j++)
+		for (int j = 0; j < matrix[i].length; j++)
 			mat[0][j] = matrix[i][j];
 		
 		return new Matrix(mat);
@@ -189,6 +197,7 @@ public class Matrix {
 			throw new IllegalArgumentException("Invalid column selection, only "+width()+" available.");
 		for (int i = 0; i < col.height(); i++)
 			matrix[i][index] = col.matrix[i][0];
+		setTranspose();
 	}
 	
 	public Matrix getTranspose() {
@@ -203,6 +212,17 @@ public class Matrix {
 			System.out.println();
 		}
 		System.out.println();
+	}
+	
+	public void printMatrixMatlab() {
+		System.out.print("[");
+		for (double[] dArr : matrix) {
+			for (double d : dArr) {
+				System.out.print(d + " ");
+			}
+			System.out.print(" ; ");
+		}
+		System.out.println("]");
 	}
 	
 	public void printDimension() {

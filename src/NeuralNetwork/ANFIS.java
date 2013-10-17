@@ -11,10 +11,9 @@ public class ANFIS extends Network {
 	double[][][] centersList;
 	double[][] spreadList;
 	int rules = 10;
-	double[][][] consequentParameters;
 	double consequentParametersMin = -0.3;
 	double consequentParametersMax = 0.3;
-	double gamma = 11235;
+	double gamma = 11235; 
 	Operations ops = new Operations();
 	Matrix A;
 	Matrix[] SList;
@@ -31,17 +30,6 @@ public class ANFIS extends Network {
 	public ANFIS() {
 		rate = 3.0;
 		
-	}
-	
-	/**
-	 * Internal helper function used to initialize parameters to small random numbers.
-	 */
-	private void initializeParams(double[][][] params) {
-		for (int i = 0; i < params.length; i++) {
-			for (int j = 0; j < params[i].length; j++)
-				for (int k = 0; k < params[i][j].length; k++)
-					params[i][j][k] = consequentParametersMin + (consequentParametersMax - consequentParametersMin) * r.nextDouble();
-		}
 	}
 	
 	protected double[][][] calculateCentersRanges(double[][][] inputs) {
@@ -111,10 +99,6 @@ public class ANFIS extends Network {
 		Layers.add(new Layer(linearNeuron, rules, null));
 		Layers.add(new Layer(linearNeuron, inputs[0][1].length, null));
 		
-		// initialize all consequent parameters for each stream to small decimal values
-		consequentParameters = new double[inputs[0][1].length][rules][inputs[0][0].length + 1];
-		initializeParams(consequentParameters);
-		
 	}
 	
 	/**
@@ -140,9 +124,13 @@ public class ANFIS extends Network {
 			
 			// get target value for current example and initialize results
 			double[] targets = datapoint[1];
+		
+		
 			double[] results = run(datapoint[0]);
 			
 			// FIXME: Why is results[4] returning NaN and rest are fine?
+			//Problem is in runSingleOutput(); .... Stream 4 only -- weird.
+			
 			// FIXME: results are all zero if X (consequent params) start as zero as they should
 			
 			//Matrix m = new Matrix(results);
@@ -178,7 +166,8 @@ public class ANFIS extends Network {
 		Matrix ARow = A.getRow(exampleNum);
 		Matrix ARowTranspose = ARow.getTranspose();
 		
-		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
+		//The for loop here had XList.length as the stopping condition. IS this right now?
+		for (int streamNum = 0; streamNum < SList.length; streamNum++) {
 			
 			Matrix P1 = SList[streamNum].multiply(ARowTranspose);
 			Matrix P2 = P1.multiply(ARow);
@@ -204,7 +193,8 @@ public class ANFIS extends Network {
 			
 		Matrix ARow = A.getRow(exampleNum);
 		Matrix ARowTranpose = ARow.getTranspose();
-			
+		
+
 		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
 			
 			for (int pathNum = 0; pathNum < XList[streamNum].width(); pathNum++) {
@@ -291,12 +281,13 @@ public class ANFIS extends Network {
 		
 		// run input through each stream of network and retrieve a results vector
 		double[] outputs = new double[Layer1List.length];
+		
 		for (int streamNum = 0; streamNum < Layer1List.length; streamNum++)
-			outputs[streamNum] = runSingleOutput(inputs, 
-												Layer1List[streamNum], 
-												centersList[streamNum], 
-												spreadList[streamNum], 
+			outputs[streamNum] = runSingleOutput(inputs, Layer1List[streamNum], centersList[streamNum], spreadList[streamNum], 
 												XList[streamNum].getTranspose().toPrimitive());
+		
+		//Above this line.
+		//System.out.println(outputs[4]);
 		
 		return outputs;
 	}
@@ -323,6 +314,7 @@ public class ANFIS extends Network {
 		double[] outputLayer1 = new double[inputLayer1.length];
 		for (int i = 0; i < Layer1.size(); i++) {
 			outputLayer1[i] = Layer1.getNeuron(i).fire(ops.norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
+			//good through here.
 		}
 
 		// LAYER 2: create product of rules
@@ -368,7 +360,6 @@ public class ANFIS extends Network {
 		for (int i = 0; i < outputLayer4.length; i++) {
 			out += outputLayer4[i];
 		}
-		
 		return out;
 	}
 	
