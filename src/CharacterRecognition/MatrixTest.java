@@ -16,8 +16,17 @@ public class MatrixTest {
 		Matrix D = A.subtract(B);
 		Matrix E = A.scalarDivide(5);
 		
-		//B.printMatrixMatlab();
-		E.printMatrix();
+		System.out.println("A");
+		A.printMatrix();
+		System.out.println("B");
+		B.printMatrix();
+		
+		A.setColumn(0, B.getColumn(0));
+		
+		
+		A.setColumn(1, B.getColumn(1));
+		//.printMatrixMatlab();
+		A.printMatrix();
 		
 		
 	}

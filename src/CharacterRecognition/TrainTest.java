@@ -42,6 +42,7 @@ public class TrainTest {
 		// RBF:  10% (rate = 3.0; spread *= 0.35;)
 		// MLP: 42% (rate = 0.002; {64}
 		// MLP: 64% 163s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
+		// ANFIS: 55%
 //		partitioner = new PartitionOnce(parserLetterRecognition.getData());
 //		trainData = partitioner.getTrain();
 //		testData = partitioner.getTest();
@@ -49,6 +50,7 @@ public class TrainTest {
 		
 		// RBF: 74% (rate = 3.0; spread *= 0.5;)
 		// MLP: 91% 22s (rate = 0.002; {100}
+		// ANFIS: 92%
 //		trainData = parserOpticalDigitsTrain.getData();
 //		testData = parserOpticalDigitsTest.getData();
 //		categories = parserOpticalDigitsTest.getCategories();
@@ -57,16 +59,16 @@ public class TrainTest {
 		// MLP: 78% (rate = 0.002; {64}
 		// MLP: 87% 75s (rate = 0.002; {1000} )
 		// MLP: 91% 93s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
-		trainData = parserPenDigitsTrain.getData();
-		testData = parserPenDigitsTest.getData();
-		categories = parserPenDigitsTest.getCategories();
+//		trainData = parserPenDigitsTrain.getData();
+//		testData = parserPenDigitsTest.getData();
+//		categories = parserPenDigitsTest.getCategories();
 		
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
 		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
-//		partitioner = new PartitionOnce(parserSemeion.getData());
-//		trainData = partitioner.getTrain();
-//		testData = partitioner.getTest();
-//		categories = parserSemeion.getCategories();
+		partitioner = new PartitionOnce(parserSemeion.getData());
+		trainData = partitioner.getTrain();
+		testData = partitioner.getTest();
+		categories = parserSemeion.getCategories();
 		
 		// disable
 		//trainData = new double[1][2][1];

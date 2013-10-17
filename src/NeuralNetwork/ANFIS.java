@@ -11,13 +11,12 @@ public class ANFIS extends Network {
 	double[][][] centersList;
 	double[][] spreadList;
 	int rules = 10;
-	double consequentParametersMin = -0.3;
-	double consequentParametersMax = 0.3;
-	double gamma = 11235; 
+	double gamma = 11235;
 	Operations ops = new Operations();
 	Matrix A;
 	Matrix[] SList;
 	Matrix[] XList;
+	Matrix[] BList;
 	
 	Neuron defaultLayer1Neuron = new Neuron(FunctionType.GAUSSIAN);
 	
@@ -28,7 +27,7 @@ public class ANFIS extends Network {
 	 * Changes to the default Neural Network are modified here.
 	 */
 	public ANFIS() {
-		rate = 3.0;
+		
 		
 	}
 	
@@ -65,6 +64,8 @@ public class ANFIS extends Network {
 				double max = maxs[streamNum][inputNum];
 				double step = (max - min) / (rules + 1);
 				for (int ruleNum = 0; ruleNum < rules; ruleNum++) {
+					if (min == max)
+						max = min + 1;
 					centers[streamNum][inputNum * rules + ruleNum][0] = min + step * (ruleNum + 1);
 					double dmax = (max - min) - (step * 2);
 					spreadList[streamNum][inputNum * rules + ruleNum] = dmax / Math.sqrt(rules); 
@@ -92,12 +93,14 @@ public class ANFIS extends Network {
 		
 		// Network is traversed in run code, so Layers is not actually used
 		// The following is strictly for displaying the network structure in the "describe" function
+		/*
 		Layers.add(Layer1List[0]);
 		Neuron linearNeuron = new Neuron(FunctionType.LINEAR);
 		Layers.add(new Layer(linearNeuron, rules, null));
 		Layers.add(new Layer(linearNeuron, rules, null));
 		Layers.add(new Layer(linearNeuron, rules, null));
 		Layers.add(new Layer(linearNeuron, inputs[0][1].length, null));
+		*/
 		
 	}
 	
@@ -117,45 +120,14 @@ public class ANFIS extends Network {
 		constructNetwork(data);
 		buildMatrices(data);
 		
-		// loop through the input/output patterns and train on each
+		// LSE (offline)
 		for (int exampleNum = 0; exampleNum < data.length && exampleNum < maxInputs; exampleNum++) {
-			
-			double[][] datapoint = data[exampleNum];
-			
-			// get target value for current example and initialize results
-			double[] targets = datapoint[1];
-		
-		
-			double[] results = run(datapoint[0]);
-			
-			// FIXME: Why is results[4] returning NaN and rest are fine?
-			//Problem is in runSingleOutput(); .... Stream 4 only -- weird.
-			
-			// FIXME: results are all zero if X (consequent params) start as zero as they should
-			
-			//Matrix m = new Matrix(results);
-			//m.printMatrix();
-			
 			updateSList(exampleNum);
-			updateXList(exampleNum, results);
-			
-			/*
-			// train on current example until error is small enough or max iterations exceeded
-			maxError = Double.MAX_VALUE;
-			for (int it = 0; maxError > stopError && it < maxIterations; it++) {
-				
-				results = run(datapoint[0]);  // run the inputs through the network and retrieve the results
-				
-				//backpropagate(targets, results);  // backpropogate to train premise params
-				
-				maxError = Math.pow((Math.abs(targets[0] - results[0])), 2);  // calculate the max squared error
-				
-			}
-			*/
-			
+			updateXList(exampleNum);
 			
 		}
-		//XList[0].printMatrix();
+		//SList[3].printMatrix();
+		//SList[4].printMatrix();;
 		
 	}
 	
@@ -189,7 +161,7 @@ public class ANFIS extends Network {
 	
 	
 	//TODO -- comment
-	private void updateXList(int exampleNum, double[] results) {
+	private void updateXList(int exampleNum) {
 			
 		Matrix ARow = A.getRow(exampleNum);
 		Matrix ARowTranpose = ARow.getTranspose();
@@ -201,7 +173,7 @@ public class ANFIS extends Network {
 			
 				Matrix P1 = ARow.multiply(XList[streamNum].getColumn(pathNum));
 				
-				double rhs = results[streamNum] - P1.getScalar();
+				double rhs = BList[streamNum].getRow(exampleNum).getScalar() - P1.getScalar();
 				
 				Matrix Q1 = SList[streamNum].multiply(ARowTranpose);
 				Matrix Q2 = Q1.scalarMultiply(rhs);
@@ -218,6 +190,7 @@ public class ANFIS extends Network {
 	
 	private void buildMatrices(double[][][] data) {
 		buildA(data);
+		buildBList(data);
 		buildSList(data[0][1].length);
 		buildXList(data[0][1].length);
 	}
@@ -242,16 +215,20 @@ public class ANFIS extends Network {
 	private void buildXList(int size) {
 		XList = new Matrix[size];
 		for (int streamNum = 0; streamNum < XList.length; streamNum++) {
-			double[][] mat = new double[A.width()][rules];
-			for (int i = 0; i < mat.length; i++) {
-				for (int j = 0; j < mat[i].length; j++) {
-					mat[i][j] = consequentParametersMin + (consequentParametersMax - consequentParametersMin) * r.nextDouble();
-				}
-			}
-			//When X was initialized to 0, we got all values in the first column filled.
-			// FIXME: Initializing to random vals because run produced zero results if X was initialized to zeros (which it should be)
-			XList[streamNum] = new Matrix(mat);
+			XList[streamNum] = new Matrix(A.width(), rules, 0);
 		}
+	}
+	
+	private void buildBList(double[][][] data) {
+		double[][] outputs = new double[data[0][1].length][data.length];
+		BList = new Matrix[outputs.length];
+		for (int streamNum = 0; streamNum < outputs.length; streamNum++) {
+			for (int exampleNum = 0; exampleNum < outputs[streamNum].length; exampleNum++) {
+				outputs[streamNum][exampleNum] = data[exampleNum][1][streamNum];
+			}
+		}
+		for (int streamNum = 0; streamNum < outputs.length; streamNum++)
+			BList[streamNum] = new Matrix(outputs[streamNum]);
 	}
 	
 	/**
@@ -275,19 +252,20 @@ public class ANFIS extends Network {
 	public double[] run(double inputs[]) {
 		
 		// validate input dimensions
-		if (inputs.length * rules != Layers.get(0).size())
+		if (inputs.length * rules != Layer1List[0].size())
 			throw new IllegalArgumentException("Inputs must match input layer size." +
 											   "Expected " + Layers.get(0).size() / rules + ", found " + inputs.length + ".");
 		
 		// run input through each stream of network and retrieve a results vector
 		double[] outputs = new double[Layer1List.length];
 		
+		
 		for (int streamNum = 0; streamNum < Layer1List.length; streamNum++)
 			outputs[streamNum] = runSingleOutput(inputs, Layer1List[streamNum], centersList[streamNum], spreadList[streamNum], 
-												XList[streamNum].getTranspose().toPrimitive());
+												XList[streamNum].getTranspose().toPrimitive(), streamNum);
 		
 		//Above this line.
-		//System.out.println(outputs[4]);
+		//System.out.println(outputs[5]);
 		
 		return outputs;
 	}
@@ -302,7 +280,9 @@ public class ANFIS extends Network {
 	 * @param consequentParams
 	 * @return	The scalar output of the stream, bounded by range [0,1]
 	 */
-	private double runSingleOutput(double[] inputs, Layer Layer1, double[][] centers, double[] spread, double[][] consequentParams) {
+	private double runSingleOutput(double[] inputs, Layer Layer1, double[][] centers, double[] spread, double[][] consequentParams, int streamNum) {
+		
+
 		
 		// LAYER 1: Gaussian activation functions
 		double[] inputLayer1 = new double[inputs.length * rules];
@@ -314,8 +294,13 @@ public class ANFIS extends Network {
 		double[] outputLayer1 = new double[inputLayer1.length];
 		for (int i = 0; i < Layer1.size(); i++) {
 			outputLayer1[i] = Layer1.getNeuron(i).fire(ops.norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
-			//good through here.
+			
+			if (streamNum == 4 && Double.isNaN(outputLayer1[i])){
+				System.out.println();
+			}
 		}
+		
+
 
 		// LAYER 2: create product of rules
 		double[] outputLayer2 = new double[rules];
@@ -361,6 +346,16 @@ public class ANFIS extends Network {
 			out += outputLayer4[i];
 		}
 		return out;
+	}
+	
+	public void describe() {
+		System.out.print("NETWORK {");
+		System.out.print(Layer1List[0].size()+":"+Layer1List[0].getNeuron(0).getFunctionType()+",");
+		System.out.print(rules+":Product,");
+		System.out.print(rules+":Normalization,");
+		System.out.print(rules+":Linear,");
+		System.out.print(Layer1List.length+":Summation");
+		System.out.println("}:");
 	}
 	
 	/**
