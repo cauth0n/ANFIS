@@ -65,6 +65,7 @@ public class TrainTest {
 		
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
 		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
+		//ANFIS: 83% (rules = 10)
 		partitioner = new PartitionOnce(parserSemeion.getData());
 		trainData = partitioner.getTrain();
 		testData = partitioner.getTest();
