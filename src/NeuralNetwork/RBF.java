@@ -71,22 +71,6 @@ public class RBF extends Network {
 	}
 
 	/**
-	 * Helper function to find the max distance between all centers.
-	 * 
-	 * @param centers
-	 * @return largest distance.
-	 */
-	private double maxDistance(double[][] centers) {
-		double dmax = 0.0;
-		for (int i = 0; i < centers.length - 1; i++) {
-			for (int j = i + 1; j < centers.length; j++) {
-				dmax = Math.max(dmax, operations.euclidean(centers[i], centers[j]));
-			}
-		}
-		return dmax;
-	}
-
-	/**
 	 * Calculates the centers by evenly partitioning the input space.
 	 * 
 	 * We take the min and max values from the input data and set that as our

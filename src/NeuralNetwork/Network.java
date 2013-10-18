@@ -1,6 +1,8 @@
 package NeuralNetwork;
 import java.util.ArrayList;
 
+import LinearAlgebra.Operations;
+
 public abstract class Network {
 
 	public ArrayList<Layer> Layers = new ArrayList<Layer>();
@@ -18,6 +20,7 @@ public abstract class Network {
 	protected int maxInputs = 100000;
 	protected boolean classify = true;
 	protected int[][] confusionMatrix;
+	protected Operations ops = new Operations();
 	
 	/**
 	 * Sets whether or not the bias should be used.
@@ -135,6 +138,22 @@ public abstract class Network {
 		else
 			return (totalError / inputs.length);
 		
+	}
+	
+	/**
+	 * Helper function to find the max distance between all centers.
+	 * 
+	 * @param centers
+	 * @return largest distance.
+	 */
+	protected double maxDistance(double[][] centers) {
+		double dmax = 0.0;
+		for (int i = 0; i < centers.length - 1; i++) {
+			for (int j = i + 1; j < centers.length; j++) {
+				dmax = Math.max(dmax, ops.euclidean(centers[i], centers[j]));
+			}
+		}
+		return dmax;
 	}
 	
 	public void printConfusionMatrix(int[] classes) {

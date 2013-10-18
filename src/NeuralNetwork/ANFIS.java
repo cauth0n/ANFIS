@@ -76,6 +76,72 @@ public class ANFIS extends Network {
 		return centers;
 	}
 	
+	protected double[][][] calculateCentersKMeans(double[][][] inputs) {
+		
+		int numPatterns = inputs.length;
+		int numStreams = inputs[0][1].length;
+		int numInputs = inputs[0][0].length;
+		int numInputNeurons = numInputs * rules;
+		
+		double[][][] centers = new double[numStreams][numInputNeurons][1];
+		spreadList = new double[numStreams][numInputNeurons];
+		
+		// examples[stream#][input#][featureIndex][featureArray (1 value)]
+		double[][][][] examples = new double[numStreams][numInputs][][];
+		int[][] exampleIndexes = new int[numStreams][numInputs];
+		int[] streamSizes = new int[numStreams];
+		
+		// find number of each output
+		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
+			int streamIndex;
+			for (streamIndex = 0; streamIndex < numStreams; streamIndex++)
+				if (inputs[patternNum][1][streamIndex] > 0.0)
+					break;
+			streamSizes[streamIndex]++;
+		}
+		
+		// store example with respect to each output for use by kmeans
+		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
+			int streamIndex;
+			for (streamIndex = 0; streamIndex < numStreams; streamIndex++)
+				if (inputs[patternNum][1][streamIndex] > 0.0)
+					break;
+			
+			// store example for this stream
+			for (int inputNum = 0; inputNum < numInputs; inputNum++) {
+				int exampleIndex = exampleIndexes[streamIndex][inputNum]++;
+				if (exampleIndex == 0)
+					examples[streamIndex][inputNum] = new double[streamSizes[streamIndex]][1];
+				examples[streamIndex][inputNum][exampleIndex] = new double[]{inputs[patternNum][0][inputNum]};
+			}
+			
+		}
+		
+		for (int streamNum = 0; streamNum < numStreams; streamNum++) {
+			for (int inputNum = 0; inputNum < numInputs; inputNum++) {
+				
+				// run K-Means clustering
+				KMeans km = new KMeans(examples[streamNum][inputNum], rules);
+				double[][] means = km.getMeans();
+				
+				// find max distance between centers and increase it if they are on top of each other
+				double dmax = maxDistance(means);
+				
+				// set centers for current stream and input
+				for (int meanNum = 0; meanNum < means.length; meanNum++) {
+					int index = inputNum * rules + meanNum;
+					centers[streamNum][index] = means[meanNum];
+					spreadList[streamNum][index] = dmax / Math.sqrt(rules); 
+				}
+				
+			}
+		}
+		
+		
+		
+		return centers;
+	}
+	
 	/**
 	 * Internal helper function used to construct a network structure for an RBF.
 	 * 
@@ -90,18 +156,6 @@ public class ANFIS extends Network {
 		for (int i = 0; i < Layer1List.length; i++)
 			Layer1List[i] = new Layer(defaultLayer1Neuron, inputs[0][0].length * rules, null);
 		
-		
-		// Network is traversed in run code, so Layers is not actually used
-		// The following is strictly for displaying the network structure in the "describe" function
-		/*
-		Layers.add(Layer1List[0]);
-		Neuron linearNeuron = new Neuron(FunctionType.LINEAR);
-		Layers.add(new Layer(linearNeuron, rules, null));
-		Layers.add(new Layer(linearNeuron, rules, null));
-		Layers.add(new Layer(linearNeuron, rules, null));
-		Layers.add(new Layer(linearNeuron, inputs[0][1].length, null));
-		*/
-		
 	}
 	
 	/**
@@ -113,7 +167,8 @@ public class ANFIS extends Network {
 		
 		// first think, calculate the centers by evenly partitioning
 		// the range of each input with respect to outputs
-		centersList = calculateCentersRanges(data);
+		centersList = calculateCentersKMeans(data);
+		//centersList = calculateCentersRanges(data);
 		
 		// construct the network, using the dimension of inputs and outputs
 		// to determine input layer size and number of streams
