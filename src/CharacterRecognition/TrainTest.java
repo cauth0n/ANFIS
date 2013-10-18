@@ -50,7 +50,7 @@ public class TrainTest {
 		
 		// RBF: 74% (rate = 3.0; spread *= 0.5;)
 		// MLP: 91% 22s (rate = 0.002; {100}
-		// ANFIS: 92%
+		// ANFIS: 92% (rules = 10)
 //		trainData = parserOpticalDigitsTrain.getData();
 //		testData = parserOpticalDigitsTest.getData();
 //		categories = parserOpticalDigitsTest.getCategories();
@@ -59,6 +59,7 @@ public class TrainTest {
 		// MLP: 78% (rate = 0.002; {64}
 		// MLP: 87% 75s (rate = 0.002; {1000} )
 		// MLP: 91% 93s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
+		// ANFIS: 53%
 //		trainData = parserPenDigitsTrain.getData();
 //		testData = parserPenDigitsTest.getData();
 //		categories = parserPenDigitsTest.getCategories();
@@ -66,10 +67,14 @@ public class TrainTest {
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
 		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
 		//ANFIS: 83% (rules = 10)
-		partitioner = new PartitionOnce(parserSemeion.getData());
-		trainData = partitioner.getTrain();
-		testData = partitioner.getTest();
-		categories = parserSemeion.getCategories();
+//		partitioner = new PartitionOnce(parserSemeion.getData());
+//		trainData = partitioner.getTrain();
+//		testData = partitioner.getTest();
+//		categories = parserSemeion.getCategories();
+		
+		Preprocessor pp = new PreprocessorCompress(parserSemeion.getData());
+		double[][][] testset = pp.getProcessed();
+		
 		
 		// disable
 		//trainData = new double[1][2][1];
@@ -85,6 +90,7 @@ public class TrainTest {
 		
 		nn = new ANFIS();
 		
+		/*
 		long startTime = System.nanoTime();
 		nn.train(trainData);
 		nn.describe();
@@ -96,6 +102,7 @@ public class TrainTest {
 		System.out.print(trainTime+"\t");
 		System.out.println("\n");
 		nn.printConfusionMatrix(categories);
+		*/
 		
 	}
 	

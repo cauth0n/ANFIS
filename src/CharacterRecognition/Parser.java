@@ -31,6 +31,8 @@ public abstract class Parser {
 	protected BufferedReader reader;
 	protected int lines;
 	protected double[] categories;
+	protected double[][][] data;
+	protected boolean parsed = false;
 	
 	public Parser(String file) throws FileNotFoundException {
 		reader = new BufferedReader(new FileReader(file));
@@ -57,14 +59,17 @@ public abstract class Parser {
 	}
 	
 	public double[][][] getData() {
-		double[][][] data = new double[lines][2][];
-		String line;
-		try {
-			int i = 0;
-			while ((line = this.getNextLine()) != null)
-				data[i++] = parseLine(line);
-		} catch (IOException e) {	e.printStackTrace();	}
-		categorizeOutput(data);
+		if (parsed == false) {
+			parsed = true;
+			data = new double[lines][2][];
+			String line;
+			try {
+				int i = 0;
+				while ((line = this.getNextLine()) != null)
+					data[i++] = parseLine(line);
+			} catch (IOException e) {	e.printStackTrace();	}
+			categorizeOutput(data);
+		}
 		return data;
 	}
 	

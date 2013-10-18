@@ -39,7 +39,7 @@ public class ParserSemeion extends Parser {
 		// read inputs. Inputs are every value except for the last 10.
 		// This means there are a TON of input features. 256 to be
 		// exact.
-		data[0] = new double[elements.length - 1];
+		data[0] = new double[elements.length - 10];
 		for (int i = 0; i < elements.length - 10; i++)
 			data[0][i] = Double.valueOf(elements[i]);
 

@@ -10,7 +10,7 @@ public class ANFIS extends Network {
 	Random r = new Random(11235);
 	double[][][] centersList;
 	double[][] spreadList;
-	int rules = 10;
+	int rules = 2;
 	double gamma = 11235;
 	Operations ops = new Operations();
 	Matrix A;
@@ -294,10 +294,6 @@ public class ANFIS extends Network {
 		double[] outputLayer1 = new double[inputLayer1.length];
 		for (int i = 0; i < Layer1.size(); i++) {
 			outputLayer1[i] = Layer1.getNeuron(i).fire(ops.norm(new double[]{inputLayer1[i]}, centers[i]), spread[i]);
-			
-			if (streamNum == 4 && Double.isNaN(outputLayer1[i])){
-				System.out.println();
-			}
 		}
 		
 
