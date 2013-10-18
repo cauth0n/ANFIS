@@ -137,11 +137,13 @@ public abstract class Network {
 		
 	}
 	
-	public void printConfusionMatrix() {
-		
-	}
-	
 	public void printConfusionMatrix(int[] classes) {
+		
+		// allow for ascii code or digits based on index of array
+		for (int i = 0; i < classes.length; i++)
+			if (classes[i] < 10)
+				classes[i] += 48;
+		
 		if (confusionMatrix != null) {
 			int padding = 5;
 			System.out.print("   | ");

@@ -66,15 +66,13 @@ public class TrainTest {
 		
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
 		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
-		//ANFIS: 83% (rules = 10)
-//		partitioner = new PartitionOnce(parserSemeion.getData());
-//		trainData = partitioner.getTrain();
-//		testData = partitioner.getTest();
-//		categories = parserSemeion.getCategories();
-		
+		// ANFIS: 83% (rules = 10)
+		// ANFIS: 88% (PREPROCESSED, rules = 2)
 		Preprocessor pp = new PreprocessorCompress(parserSemeion.getData());
-		double[][][] testset = pp.getProcessed();
-		
+		partitioner = new PartitionOnce(pp.getProcessed());
+		trainData = partitioner.getTrain();
+		testData = partitioner.getTest();
+		categories = parserSemeion.getCategories();
 		
 		// disable
 		//trainData = new double[1][2][1];
@@ -90,7 +88,7 @@ public class TrainTest {
 		
 		nn = new ANFIS();
 		
-		/*
+		
 		long startTime = System.nanoTime();
 		nn.train(trainData);
 		nn.describe();
@@ -102,7 +100,7 @@ public class TrainTest {
 		System.out.print(trainTime+"\t");
 		System.out.println("\n");
 		nn.printConfusionMatrix(categories);
-		*/
+		
 		
 	}
 	

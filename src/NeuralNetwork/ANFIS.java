@@ -264,9 +264,6 @@ public class ANFIS extends Network {
 			outputs[streamNum] = runSingleOutput(inputs, Layer1List[streamNum], centersList[streamNum], spreadList[streamNum], 
 												XList[streamNum].getTranspose().toPrimitive(), streamNum);
 		
-		//Above this line.
-		//System.out.println(outputs[5]);
-		
 		return outputs;
 	}
 	

@@ -10,6 +10,8 @@ public abstract class Preprocessor {
 		this.processed = new double[data.length][2][];
 	}
 	
-	public abstract double[][][] getProcessed();
+	public double[][][] getProcessed() {
+		return processed;
+	}
 
 }
