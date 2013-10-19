@@ -39,23 +39,26 @@ public class TrainTest {
 		int[] categories;
 		Partitioner partitioner;
 		
-		// RBF:  10% (rate = 3.0; spread *= 0.35;)
+		// RBF: 10% (rate = 3.0; spread *= 0.35;)
+		// RBF: 4% DIDN'T LEARN (KMeans)
 		// MLP: 42% (rate = 0.002; {64}
 		// MLP: 64% 163s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
 		// ANFIS: 55%
-		partitioner = new PartitionOnce(parserLetterRecognition.getData());
-		trainData = partitioner.getTrain();
-		testData = partitioner.getTest();
-		categories = parserLetterRecognition.getCategories();
+//		partitioner = new PartitionOnce(parserLetterRecognition.getData());
+//		trainData = partitioner.getTrain();
+//		testData = partitioner.getTest();
+//		categories = parserLetterRecognition.getCategories();
 		
 		// RBF: 74% (rate = 3.0; spread *= 0.5;)
+		// RBF: 87% 33s (KMeans)
 		// MLP: 91% 22s (rate = 0.002; {100}
 		// ANFIS: 92% (rules = 10)
-//		trainData = parserOpticalDigitsTrain.getData();
-//		testData = parserOpticalDigitsTest.getData();
-//		categories = parserOpticalDigitsTest.getCategories();
+		trainData = parserOpticalDigitsTrain.getData();
+		testData = parserOpticalDigitsTest.getData();
+		categories = parserOpticalDigitsTest.getCategories();
 		
 		// RBF: 66% (rate = 3.0; spread *= 0.4;)
+		// RBF: 56% 125s (KMeans) (favors 5, consider reducing K for 5)
 		// MLP: 78% (rate = 0.002; {64}
 		// MLP: 87% 75s (rate = 0.002; {1000} )
 		// MLP: 91% 93s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
@@ -66,11 +69,13 @@ public class TrainTest {
 //		categories = parserPenDigitsTest.getCategories();
 		
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
+		// RBF: 10% DIDN"T LEARN (KMeans)
 		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
 		// ANFIS: 83% (rules = 10)
 		// ANFIS: 88% (PREPROCESSED, rules = 2)
 //		Preprocessor pp = new PreprocessorCompress(parserSemeion.getData());
 //		partitioner = new PartitionOnce(pp.getProcessed());
+//		//partitioner = new PartitionOnce(parserSemeion.getData());
 //		trainData = partitioner.getTrain();
 //		testData = partitioner.getTest();
 //		categories = parserSemeion.getCategories();
@@ -85,9 +90,9 @@ public class TrainTest {
 		//nn = new MLP();  // creates a new MLP network
 		//nn.setHiddenLayers(new int[]{100}, FunctionType.TANH);
 		
-		//nn = new RBF();  // creates a new RBF network
+		nn = new RBF();  // creates a new RBF network
 		
-		nn = new ANFIS();
+		//nn = new ANFIS();
 		
 		
 		long startTime = System.nanoTime();

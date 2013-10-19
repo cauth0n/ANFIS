@@ -9,6 +9,7 @@ public class RBF extends Network {
 	double[][] centers;
 	double spread;
 	int partitions = 5;
+	int k = 3;
 
 	double spreadCoefficient = 0.35;
 	double scalarCoefficient = 0.25;
@@ -29,6 +30,80 @@ public class RBF extends Network {
 	public void setCenters(double[][] centers) {
 		this.centers = centers;
 		customCenters = true;
+	}
+	
+	/**
+	 * Finds K-mean clusters for each output.
+	 * The complexity is due to the restructuring of 
+	 * input-output data to be used by KMeans.
+	 * 
+	 * @param inputs
+	 * @return
+	 */
+	protected double[][] calculateCentersKMeans(double[][][] inputs) {
+		
+		int numPatterns = inputs.length;
+		int numOutputs = inputs[0][1].length;
+		int numInputs = inputs[0][0].length;
+		int numInputNeurons = numInputs * k;
+		
+		double[][] centers = new double[numOutputs * k][numInputNeurons];
+		
+		// examples[stream#][example#][features]
+		double[][][] examples = new double[numOutputs][][];
+		int[] exampleIndexes = new int[numOutputs];
+		int[] outputSizes = new int[numOutputs];
+		
+		// find number of examples of each output
+		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
+			
+			// find which output this example belongs to
+			int outputIndex;
+			for (outputIndex = 0; outputIndex < numOutputs; outputIndex++)
+				if (inputs[patternNum][1][outputIndex] > 0.0)
+					break;
+			outputSizes[outputIndex]++;
+		}
+		
+		// store example with respect to each output for use by kmeans
+		for (int patternNum = 0; patternNum < numPatterns; patternNum++) {
+			
+			// find which output this example belongs to
+			int outputIndex;
+			for (outputIndex = 0; outputIndex < numOutputs; outputIndex++)
+				if (inputs[patternNum][1][outputIndex] > 0.0)
+					break;
+			
+			// store example for this stream
+			int exampleIndex = exampleIndexes[outputIndex]++;
+			if (exampleIndex == 0)
+				examples[outputIndex] = new double[outputSizes[outputIndex]][];
+			examples[outputIndex][exampleIndex] = inputs[patternNum][0];
+			
+		}
+		
+		
+		for (int outputNum = 0; outputNum < numOutputs; outputNum++) {
+				
+			// run K-Means clustering
+			KMeans km = new KMeans(examples[outputNum], k);
+			double[][] means = km.getMeans();
+			
+			// find max distance between centers and increase it if they are on top of each other
+			double dmax = maxDistance(means);
+			spread = dmax / Math.sqrt(k); 
+			
+			// set centers for current output
+			for (int meanNum = 0; meanNum < means.length; meanNum++) {
+				int index = outputNum * k + meanNum;
+				centers[index] = means[meanNum];
+			}
+			
+		}
+		
+		
+		
+		return centers;
 	}
 
 	/**
@@ -181,7 +256,7 @@ public class RBF extends Network {
 		if (!customCenters) {
 			// classify is set in the Network class
 			if (classify)
-				centers = calculateCentersMeans(inputs);
+				centers = calculateCentersKMeans(inputs);
 			else
 				// is function approx.
 				centers = calculateCentersUniform(inputs);
