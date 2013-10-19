@@ -143,13 +143,18 @@ public abstract class Network {
 	
 	public void printConfusionMatrix(int[] classes) {
 		
+		int padding = 6;
+		int decimal = 3;
+		
 		// allow for ascii code or digits based on index of array
 		for (int i = 0; i < classes.length; i++)
 			if (classes[i] < 10)
 				classes[i] += 48;
 		
+		System.out.println();
+		System.out.println("Confusion Matrix (Horizontal = Actual, Vertical = Expected)");
+		
 		if (confusionMatrix != null) {
-			int padding = 5;
 			System.out.print("   | ");
 			for (int i = 0; i < classes.length; i++)
 				System.out.printf("%"+padding+"c", (char) classes[i]);
@@ -165,6 +170,42 @@ public abstract class Network {
 				System.out.println("");
 			}
 		}
+		
+		double[] precision = new double[confusionMatrix.length];
+		double[] recall = new double[confusionMatrix.length];
+		
+		
+
+		for (int i = 0; i < confusionMatrix.length; i++){
+			double runningPrecision = 0;
+			double runningRecall = 0;
+			for (int j = 0; j < confusionMatrix.length; j++){
+				runningPrecision += confusionMatrix[j][i];
+				runningRecall += confusionMatrix[i][j];
+			}
+			precision[i] = confusionMatrix[i][i] / runningPrecision;
+			recall[i] = confusionMatrix[i][i] / runningRecall;
+		}
+		System.out.println("\n");
+
+		// print precision and recall table
+		System.out.print("          | ");
+		for (int i = 0; i < precision.length; i++)
+			System.out.printf("%"+padding+"c", (char) classes[i]);
+		System.out.println();
+		
+		for (int i = 0; i < (classes.length + 1) * padding + 7; i++)
+			System.out.print("-");
+		System.out.println();
+		
+		System.out.print("precision | ");
+		for (int i = 0; i < precision.length; i++)
+			System.out.printf("%"+padding+"."+decimal+"f", precision[i]);
+		System.out.println();
+		
+		System.out.print("   recall | ");
+		for (int i = 0; i < recall.length; i++)
+			System.out.printf("%"+padding+"."+decimal+"f", recall[i]);
 	}
 	
 	/**

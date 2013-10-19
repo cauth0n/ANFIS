@@ -22,12 +22,13 @@ public class RBF extends Network {
 	Neuron defaultOutputNeuron = new Neuron(FunctionType.LINEAR);
 	Operations operations = new Operations();
 
-	/**
-	 * Constructor for the RBF network. Changes to the default Neural Network
-	 * are modified here.
-	 */
-	public RBF() {
-		
+	
+
+	public RBF(int k, double rate, double spreadCoefficient, double functionCoefficient) {
+		this.k = k;
+		this.rate = rate;
+		this.spreadCoefficient = spreadCoefficient;
+		this.functionCoefficient = functionCoefficient;
 	}
 
 	public void setCenters(double[][] centers) {
@@ -255,6 +256,7 @@ public class RBF extends Network {
 	 * inputs[example_index][1] = array of output values
 	 */
 	public void train(double[][][] inputs) {
+		
 		if (!customCenters) {
 			// classify is set in the Network class
 			if (classify)

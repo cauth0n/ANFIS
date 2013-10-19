@@ -126,6 +126,7 @@ public class TrainTest {
                 System.out.println("Run time: "  + partitionTime / 1000000000.0);
                 System.out.println();
                 part++;
+                break;
         }
         error /= part;
         double trainTime = (elapsedTime / part);
