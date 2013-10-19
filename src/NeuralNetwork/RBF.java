@@ -9,10 +9,13 @@ public class RBF extends Network {
 	double[][] centers;
 	double spread;
 	int partitions = 5;
-	int k = 3;
-
-	double spreadCoefficient = 0.35;
-	double scalarCoefficient = 0.25;
+	
+	int k = 15;
+	double rate = 3.0;
+	double spreadCoefficient = 0.3;
+	double functionCoefficient = 0.6;
+	
+	boolean echo = true;
 
 	Neuron defaultInputNeuron = new Neuron(FunctionType.LINEAR);
 	Neuron defaultHiddenNeuron = new Neuron(FunctionType.GAUSSIAN);
@@ -24,7 +27,7 @@ public class RBF extends Network {
 	 * are modified here.
 	 */
 	public RBF() {
-		rate = 3.0; // ???
+		
 	}
 
 	public void setCenters(double[][] centers) {
@@ -140,7 +143,6 @@ public class RBF extends Network {
 
 		double dmax = maxDistance(centers);
 		spread = dmax / Math.sqrt(centers.length);
-		spread *= spreadCoefficient;
 
 		return centers;
 	}
@@ -261,6 +263,7 @@ public class RBF extends Network {
 				// is function approx.
 				centers = calculateCentersUniform(inputs);
 		}
+		spread *= spreadCoefficient;
 		constructNetwork(inputs);
 
 		double maxOutput = 0.0;
@@ -270,7 +273,7 @@ public class RBF extends Network {
 
 		// scale activation functions based on inputs
 		for (Layer layer : Layers)
-			layer.scaleFunctions(maxOutput * scalarCoefficient);
+			layer.scaleFunctions(maxOutput * functionCoefficient);
 
 		int percent = -1;
 
