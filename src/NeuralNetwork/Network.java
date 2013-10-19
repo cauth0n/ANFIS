@@ -12,7 +12,7 @@ public abstract class Network {
 	double weightMax = 0.3;
 	double maxError;
 	double stopError = 0.001;
-	boolean echo = false;
+	boolean echo = true;
 	protected int maxIterations = 5000;
 	protected Layer inputLayer, outputLayer;
 	protected int maxInputs = 100000;

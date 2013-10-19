@@ -8,14 +8,16 @@ public class MLP extends Network {
 	private int[] hiddenSize = new int[] {};
 	private FunctionType hiddenActivation;
 
-	double functionScale = 0.25;
-	double rate = 0.002;
+	double functionScale;
+	double rate;
 	
 	/**
 	 * Constructor for the MLP network. Changes to the default Neural Network
 	 * are modified here.
 	 */
-	public MLP() {
+	public MLP(double functionScale, double rate) {
+		this.functionScale = functionScale;
+		this.rate = rate;
 	}
 
 	/**
