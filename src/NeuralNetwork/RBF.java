@@ -274,10 +274,6 @@ public class RBF extends Network {
 
 		int percent = -1;
 
-		// Norm is set in Network
-		if (norm != null)
-			norm.normalize(inputs);
-
 		for (int in = 0; in < inputs.length && in < maxInputs; in++) {
 			double[][] datapoint = inputs[in];
 

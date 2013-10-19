@@ -8,16 +8,14 @@ public class MLP extends Network {
 	private int[] hiddenSize = new int[] {};
 	private FunctionType hiddenActivation;
 
-	double scalarCoefficient = 0.25;
-
+	double functionScale = 0.25;
+	double rate = 0.002;
+	
 	/**
 	 * Constructor for the MLP network. Changes to the default Neural Network
 	 * are modified here.
 	 */
 	public MLP() {
-		// rate = 0.002 for Pen Digits
-		rate = 0.002;
-		// maxInputs = 4500;
 	}
 
 	/**
@@ -72,14 +70,10 @@ public class MLP extends Network {
 				maxOutput = Math.max(Math.abs(inputs[in][1][out]), maxOutput);
 
 		// scale activation functions based on inputs
-		// The 1.0 may need to be deleted.
-		// FIXME
 		for (Layer layer : Layers)
-			layer.scaleFunctions(1.0 * maxOutput * scalarCoefficient);
+			layer.scaleFunctions(maxOutput * functionScale);
 
 		int percent = -1;
-		if (norm != null)
-			norm.normalize(inputs);
 
 		for (int in = 0; in < inputs.length && in < maxInputs; in++) {
 			double[][] datapoint = inputs[in];
@@ -145,10 +139,7 @@ public class MLP extends Network {
 				for (int k = 0; k < next.size(); k++) {
 					sum += errors[i + 1][k] * next.weights[k][j];
 				}
-				// add bias
-				if (useBias)
-					sum += next.weights[next.weights.length - 1][j];
-				// TODO: add bias
+				
 				errors[i][j] = current.getNeuron(j).gradient() * sum;
 
 				// FIXME
@@ -168,11 +159,6 @@ public class MLP extends Network {
 					current.weights[j][k] += update + (current.oldWeights[j][k] * momentum);
 					current.oldWeights[j][k] = update;
 					change = Math.max(change, Math.abs(update));
-				}
-				// add bias
-				if (useBias) {
-					int idx = current.weights[j].length - 1;
-					current.weights[j][idx] += (rate * errors[i][j]) + (current.oldWeights[j][idx] * momentum);
 				}
 			}
 		}

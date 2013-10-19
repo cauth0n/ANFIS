@@ -11,25 +11,14 @@ public abstract class Network {
 	double weightMin = -0.3;
 	double weightMax = 0.3;
 	double maxError;
-	boolean useBias = false;
 	double stopError = 0.001;
 	boolean echo = false;
-	protected Normalizer norm;
 	protected int maxIterations = 5000;
 	protected Layer inputLayer, outputLayer;
 	protected int maxInputs = 100000;
 	protected boolean classify = true;
 	protected int[][] confusionMatrix;
 	protected Operations ops = new Operations();
-	
-	/**
-	 * Sets whether or not the bias should be used.
-	 * 
-	 * @param useBias	Boolean value of whether or not to use the bias.
-	 */
-	public void useBias(boolean useBias) {
-		this.useBias = useBias;
-	}
 	
 	/**
 	 * Sets the momentum of the weights updates.
@@ -90,8 +79,6 @@ public abstract class Network {
 		
 		double totalError = 0.0;
 		int correct = 0;
-		if (norm != null)
-			norm.normalize(inputs, false);
 		for (double[][] datapoint : inputs) {
 			
 			double[] targets = datapoint[1];
