@@ -37,6 +37,7 @@ public abstract class Parser {
 	public Parser(String file) throws FileNotFoundException {
 		reader = new BufferedReader(new FileReader(file));
 		readLines(new FileReader(file));
+	
 	}
 	
 	public int[] getCategories() {
@@ -70,6 +71,19 @@ public abstract class Parser {
 			} catch (IOException e) {	e.printStackTrace();	}
 			categorizeOutput(data);
 		}
+		return data;
+	}
+	
+	public double[][][] appendData(double[][][] newData){
+		double[][][] toReturn = new double[data.length + newData.length][data[0].length][];
+	
+		for (int i = 0; i < data.length; i++){
+			toReturn[i] = data[i];
+		}
+		for (int i = 0; i < newData.length; i++){
+			toReturn[i + data.length] = newData[i];
+		}
+		data = toReturn;
 		return data;
 	}
 	

@@ -17,18 +17,22 @@ public class TrainTest {
 	public static void main(String[] args) {
 		
 		Parser parserLetterRecognition = null;
-		Parser parserOpticalDigitsTrain = null;
+		Parser parserOpticalDigits = null;
 		Parser parserOpticalDigitsTest = null;
-		Parser parserPenDigitsTrain = null;
+		Parser parserPenDigits = null;
 		Parser parserPenDigitsTest = null;
 		Parser parserSemeion = null;
 		
 		try {
 			parserLetterRecognition = new ParserLetterRecognition("data/letter-recognition.data");
-			parserOpticalDigitsTrain = new ParserOpticalDigits("data/optdigits.tra");
+			parserOpticalDigits = new ParserOpticalDigits("data/optdigits.tra");
 			parserOpticalDigitsTest = new ParserOpticalDigits("data/optdigits.tes");
-			parserPenDigitsTrain = new ParserPenDigits("data/pendigits.tra");
+			parserOpticalDigits.getData();
+			parserOpticalDigits.appendData(parserOpticalDigitsTest.getData());
+			parserPenDigits = new ParserPenDigits("data/pendigits.tra");
 			parserPenDigitsTest = new ParserPenDigits("data/pendigits.tes");
+			parserPenDigits.getData();
+			parserPenDigits.appendData(parserPenDigitsTest.getData());
 			parserSemeion = new ParserSemeion("data/semeion.data");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -39,43 +43,51 @@ public class TrainTest {
 		int[] categories;
 		Partitioner partitioner;
 		
+		int rules = 2;
+		double gamma = 100;
+		boolean useKMeans = true;
+		
 		// RBF: 10% (rate = 3.0; spread *= 0.35;)
 		// RBF: 4% DIDN'T LEARN (KMeans)
-		// MLP: 42% (rate = 0.002; {64}
-		// MLP: 64% 163s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
+		// MLP: 57% (rate = 0.001; functionScale = 0.25; {100, 50}
 		// ANFIS: 55%
-//		partitioner = new PartitionOnce(parserLetterRecognition.getData());
+//		partitioner = new PartitionRotate(parserLetterRecognition.getData());
 //		trainData = partitioner.getTrain();
 //		testData = partitioner.getTest();
 //		categories = parserLetterRecognition.getCategories();
 		
-		// RBF: 74% (rate = 3.0; spread *= 0.5;)
-		// RBF: 87% 33s (KMeans)
-		// MLP: 91% 22s (rate = 0.002; {100}
-		// ANFIS: 92% (rules = 10)
-		trainData = parserOpticalDigitsTrain.getData();
-		testData = parserOpticalDigitsTest.getData();
-		categories = parserOpticalDigitsTest.getCategories();
+
+
+		// ANFIS: 92% (rules = 2), gamma = 100, k means = true
+		// ANFIS: 92% (rules = 2), gamma = 100, k means = false
+		partitioner = new PartitionRotate(parserOpticalDigits.getData());
+		trainData = partitioner.getTrain();
+		testData = partitioner.getTest();
+		categories = parserOpticalDigits.getCategories();
 		
-		// RBF: 66% (rate = 3.0; spread *= 0.4;)
-		// RBF: 56% 125s (KMeans) (favors 5, consider reducing K for 5)
-		// MLP: 78% (rate = 0.002; {64}
-		// MLP: 87% 75s (rate = 0.002; {1000} )
-		// MLP: 91% 93s (rate = 0.002; {1000} scaleFunctions(0.8*...) )
-		// ANFIS: 53% (Uniform Centers)
+
+
+		// ANFIS: 59% (Uniform Centers)
 		// ANFIS: 59% (KMeans)
-//		trainData = parserPenDigitsTrain.getData();
-//		testData = parserPenDigitsTest.getData();
-//		categories = parserPenDigitsTest.getCategories();
+//		partitioner = new PartitionRotate(parserPenDigits.getData());
+//		trainData = partitioner.getTrain();
+//		testData = partitioner.getTest();
+//		categories = parserPenDigits.getCategories();
+		
+		
+//		int[] network = new int[]{1000};
+//		double functionScale = 0.25;
+//		double rate = 0.0005;
+		
+
 		
 		// RBF: 22% (rate = 3.0; spread *= 0.35;)
 		// RBF: 10% DIDN"T LEARN (KMeans)
-		// MLP: 19% (rate = 0.002; {1000} scaleFunctions(0.8*...) )
-		// ANFIS: 83% (rules = 10)
+		// MLP: 13% (rate = 0.002; functionScale = 0.25; {1000}  )
+		// MLP: 18% (PREPROCESSED, rate = 0.0005; functionScale = 0.25; {1000}  )
 		// ANFIS: 88% (PREPROCESSED, rules = 2)
 //		Preprocessor pp = new PreprocessorCompress(parserSemeion.getData());
-//		partitioner = new PartitionOnce(pp.getProcessed());
-//		//partitioner = new PartitionOnce(parserSemeion.getData());
+//		partitioner = new PartitionRotate(pp.getProcessed());
 //		trainData = partitioner.getTrain();
 //		testData = partitioner.getTest();
 //		categories = parserSemeion.getCategories();
@@ -87,26 +99,42 @@ public class TrainTest {
 		// create function generators
 		Network nn;
 		
-		//nn = new MLP();  // creates a new MLP network
-		//nn.setHiddenLayers(new int[]{100}, FunctionType.TANH);
+		//nn = new MLP(functionScale, rate);  // creates a new MLP network
+		//nn.setHiddenLayers(network, FunctionType.TANH);
 		
-		nn = new RBF();  // creates a new RBF network
+		//nn = new RBF();  // creates a new RBF network
 		
-		//nn = new ANFIS();
+		nn = new ANFIS(rules, gamma, useKMeans);
 		
+		double[][][] train;
+		double[][][] test;
 		
-		long startTime = System.nanoTime();
-		nn.train(trainData);
-		nn.describe();
-		long totalTime = System.nanoTime() - startTime;
-		double trainTime = (double)totalTime / 1000000000.0;
-		double correct = nn.test(testData);
-		
-		System.out.print(correct+"\t");
-		System.out.print(trainTime+"\t");
-		System.out.println("\n");
+		int part = 0;
+        double error = 0.0;
+        long elapsedTime = 0;
+        while (partitioner.nextSet()) {
+                train = partitioner.getTrain();
+                test = partitioner.getTest();
+                long startTime = System.nanoTime();
+                nn.train(train);
+                long partitionTime = System.nanoTime() - startTime;
+                elapsedTime += partitionTime;
+                double partitionError = nn.test(test);
+                error += partitionError;
+                System.out.println("Fold: " + part);
+                System.out.println("Performance: " + partitionError);
+                System.out.println("Run time: "  + partitionTime / 1000000000.0);
+                System.out.println();
+                part++;
+        }
+        error /= part;
+        double trainTime = (elapsedTime / part);
+        System.out.println("*****************************************************************");
+        System.out.println("Error: " + error);
+        System.out.println("Run time: " + trainTime / 1000000000.0);
+        
+        
 		nn.printConfusionMatrix(categories);
-		
 		
 	}
 	

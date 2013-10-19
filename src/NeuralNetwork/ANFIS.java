@@ -10,8 +10,9 @@ public class ANFIS extends Network {
 	Random r = new Random(11235);
 	double[][][] centersList;
 	double[][] spreadList;
-	int rules = 2;
-	double gamma = 11235;
+	int rules;
+	double gamma;
+	boolean useKMeans;
 	Operations ops = new Operations();
 	Matrix A;
 	Matrix[] SList;
@@ -26,9 +27,10 @@ public class ANFIS extends Network {
 	 * Constructor for the RBF network. 
 	 * Changes to the default Neural Network are modified here.
 	 */
-	public ANFIS() {
-		
-		
+	public ANFIS(int rules, double gamma, boolean useKMeans) {
+		this.rules = rules;
+		this.gamma = gamma;
+		this.useKMeans = useKMeans;
 	}
 	
 	protected double[][][] calculateCentersRanges(double[][][] inputs) {
@@ -167,16 +169,24 @@ public class ANFIS extends Network {
 		
 		// first think, calculate the centers by evenly partitioning
 		// the range of each input with respect to outputs
-		centersList = calculateCentersKMeans(data);
-		//centersList = calculateCentersRanges(data);
 		
+		if (useKMeans){
+			centersList = calculateCentersKMeans(data);
+		}else{
+			centersList = calculateCentersRanges(data);
+		}
 		// construct the network, using the dimension of inputs and outputs
 		// to determine input layer size and number of streams
 		constructNetwork(data);
 		buildMatrices(data);
 		
 		// LSE (offline)
+		int percent = -1;
 		for (int exampleNum = 0; exampleNum < data.length && exampleNum < maxInputs; exampleNum++) {
+			if (echo == true && percent != (int) (100 * ((float) exampleNum / data.length))) {
+				percent = (int) (100 * ((float) exampleNum / data.length));
+				System.out.println(percent + "%");
+			}
 			updateSList(exampleNum);
 			updateXList(exampleNum);
 			

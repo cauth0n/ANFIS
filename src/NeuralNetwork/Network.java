@@ -12,7 +12,7 @@ public abstract class Network {
 	double weightMax = 0.3;
 	double maxError;
 	double stopError = 0.001;
-	boolean echo = true;
+	boolean echo = false;
 	protected int maxIterations = 5000;
 	protected Layer inputLayer, outputLayer;
 	protected int maxInputs = 100000;
@@ -117,8 +117,6 @@ public abstract class Network {
 			if (targetIndex == resultIndex)
 				correct++;
 		}
-		
-		System.out.println(correct + " / " + inputs.length);
 		
 		if (classify)
 			return ((double)correct / inputs.length);
