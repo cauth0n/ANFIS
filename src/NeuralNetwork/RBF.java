@@ -10,12 +10,12 @@ public class RBF extends Network {
 	double spread;
 	int partitions = 5;
 	
-	int k = 15;
-	double rate = 3.0;
-	double spreadCoefficient = 0.3;
-	double functionCoefficient = 0.6;
+	int k;
+	double rate;
+	double spreadCoefficient;
+	double functionCoefficient;
 	
-	boolean echo = true;
+	boolean echo = false;
 
 	Neuron defaultInputNeuron = new Neuron(FunctionType.LINEAR);
 	Neuron defaultHiddenNeuron = new Neuron(FunctionType.GAUSSIAN);

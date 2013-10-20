@@ -47,24 +47,34 @@ public class TrainTest {
 		double gamma = 100;
 		boolean useKMeans = true;
 		
+		int k = 15;
+		double rbfRate = 3;
+		double spreadCoefficient = .3;
+		double functionCoefficient = .5;
+		
+		
+		int[] network = new int[]{100};
+		double functionScale = 0.3;
+		double rate = 0.001;
+		
 		// RBF: 10% (rate = 3.0; spread *= 0.35;)
 		// RBF: 4% DIDN'T LEARN (KMeans)
 		// MLP: 57% (rate = 0.001; functionScale = 0.25; {100, 50}
 		// ANFIS: 55%
-//		partitioner = new PartitionRotate(parserLetterRecognition.getData());
-//		trainData = partitioner.getTrain();
-//		testData = partitioner.getTest();
-//		categories = parserLetterRecognition.getCategories();
+		partitioner = new PartitionRotate(parserLetterRecognition.getData());
+		trainData = partitioner.getTrain();
+		testData = partitioner.getTest();
+		categories = parserLetterRecognition.getCategories();
 		
 
 
 		// ANFIS: 92% (rules = 2), gamma = 100, k means = true
 		// ANFIS: 92% (rules = 2), gamma = 100, k means = false
-		partitioner = new PartitionRotate(parserOpticalDigits.getData());
-		trainData = partitioner.getTrain();
-		testData = partitioner.getTest();
-		categories = parserOpticalDigits.getCategories();
-		
+//		partitioner = new PartitionRotate(parserOpticalDigits.getData());
+//		trainData = partitioner.getTrain();
+//		testData = partitioner.getTest();
+//		categories = parserOpticalDigits.getCategories();
+//		
 
 
 		// ANFIS: 59% (Uniform Centers)
@@ -74,10 +84,7 @@ public class TrainTest {
 //		testData = partitioner.getTest();
 //		categories = parserPenDigits.getCategories();
 		
-		
-//		int[] network = new int[]{1000};
-//		double functionScale = 0.25;
-//		double rate = 0.0005;
+
 		
 
 		
@@ -87,6 +94,7 @@ public class TrainTest {
 		// MLP: 18% (PREPROCESSED, rate = 0.0005; functionScale = 0.25; {1000}  )
 		// ANFIS: 88% (PREPROCESSED, rules = 2)
 //		Preprocessor pp = new PreprocessorCompress(parserSemeion.getData());
+//		//partitioner = new PartitionRotate(parserSemeion.getData());
 //		partitioner = new PartitionRotate(pp.getProcessed());
 //		trainData = partitioner.getTrain();
 //		testData = partitioner.getTest();
@@ -102,9 +110,9 @@ public class TrainTest {
 		//nn = new MLP(functionScale, rate);  // creates a new MLP network
 		//nn.setHiddenLayers(network, FunctionType.TANH);
 		
-		//nn = new RBF();  // creates a new RBF network
+		nn = new RBF(k, rbfRate, spreadCoefficient, functionCoefficient);  // creates a new RBF network
 		
-		nn = new ANFIS(rules, gamma, useKMeans);
+		//nn = new ANFIS(rules, gamma, useKMeans);
 		
 		double[][][] train;
 		double[][][] test;
@@ -113,20 +121,21 @@ public class TrainTest {
         double error = 0.0;
         long elapsedTime = 0;
         while (partitioner.nextSet()) {
-                train = partitioner.getTrain();
-                test = partitioner.getTest();
-                long startTime = System.nanoTime();
-                nn.train(train);
-                long partitionTime = System.nanoTime() - startTime;
-                elapsedTime += partitionTime;
-                double partitionError = nn.test(test);
-                error += partitionError;
-                System.out.println("Fold: " + part);
-                System.out.println("Performance: " + partitionError);
-                System.out.println("Run time: "  + partitionTime / 1000000000.0);
-                System.out.println();
-                part++;
-                break;
+      
+	        train = partitioner.getTrain();
+	        test = partitioner.getTest();
+	        long startTime = System.nanoTime();
+	        nn.train(train);
+	        long partitionTime = System.nanoTime() - startTime;
+	        elapsedTime += partitionTime;
+	        double partitionError = nn.test(test);
+	        error += partitionError;
+	        System.out.println("Fold: " + part);
+	        System.out.println("Performance: " + partitionError);
+	        System.out.println("Run time: "  + partitionTime / 1000000000.0);
+	        System.out.println();
+	        part++;
+	     
         }
         error /= part;
         double trainTime = (elapsedTime / part);
