@@ -1,0 +1,90 @@
+Analysis of Variance Table
+
+Response: hyp1
+          Df Sum Sq Mean Sq F value Pr(>F)
+group      2  10832  5416.1  0.9925 0.3838
+Residuals 27 147342  5457.1               
+> 
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp2 = hyp2, group = factor(group))
+> fit = lm(hyp2 ~ group, data)
+> anova(fit) 
+Analysis of Variance Table
+
+Response: hyp2
+          Df    Sum Sq    Mean Sq F value   Pr(>F)   
+group      2 0.0057358 0.00286788   8.565 0.001317 **
+Residuals 27 0.0090406 0.00033484                    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp3 = hyp3, group = factor(group))
+> fit = lm(hyp3 ~ group, data)
+> anova(fit)
+Analysis of Variance Table
+
+Response: hyp3
+          Df  Sum Sq  Mean Sq F value    Pr(>F)    
+group      2 0.54408 0.272039  325.64 < 2.2e-16 ***
+Residuals 27 0.02256 0.000835                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp4 = hyp4, group = factor(group))
+> fit = lm(hyp4 ~ group, data)
+> anova(fit)
+Analysis of Variance Table
+
+Response: hyp4
+          Df   Sum Sq  Mean Sq F value    Pr(>F)    
+group      2 0.028746 0.014373  28.296 2.367e-07 ***
+Residuals 27 0.013715 0.000508                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp5 = hyp5, group = factor(group))
+> fit = lm(hyp5 ~ group, data)
+> anova(fit)
+Analysis of Variance Table
+
+Response: hyp5
+          Df    Sum Sq    Mean Sq F value Pr(>F)
+group      2 0.0000749 3.7433e-05  0.2693 0.7659
+Residuals 27 0.0037525 1.3898e-04               
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp7 = hyp7, group = factor(group))
+> fit = lm(hyp7 ~ group, data)
+> anova(fit)
+Analysis of Variance Table
+
+Response: hyp7
+          Df Sum Sq Mean Sq F value    Pr(>F)    
+group      2 3832.7  1916.3  73.717 1.152e-11 ***
+Residuals 27  701.9    26.0                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> n = rep(10, 3)
+> group = rep(1:3, n)
+> data = data.frame(hyp8 = hyp8, group = factor(group))
+> fit = lm(hyp8 ~ group, data)
+> anova(fit)
+Analysis of Variance Table
+
+Response: hyp8
+          Df Sum Sq Mean Sq F value    Pr(>F)    
+group      2 881.65  440.82  3420.4 < 2.2e-16 ***
+Residuals 27   3.48    0.13                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

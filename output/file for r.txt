@@ -7,8 +7,8 @@ mlp_t_2 = c(74.573, 67.778, 60.665, 58.651, 58.292, 60.659, 58.924, 59.339, 58.9
 mlp_p_3 = c(0.910, .875, .896, .816, .908, .874, .930, .938, .938, .904)
 mlp_t_3 = c(65.192, 67.223, 66.643, 65.853, 63.907, 64.976, 66.439, 65.456, 67.656, 68.004)
 
-mlp_p_4 = c(.082, .138, .176, .182, .157, .063, .044, .296, .012, .264)
-mlp_t_4 = c(55.373, 55.630, 56.157, 55.505, 55.333, 55.955, 54.901, 55.999, 55.897, 56.117)
+mlp_p_4 = c(.849, .799, .855, .843, .849, .799, .836, .811, .811, .843)
+mlp_t_4 = c(26.061, 27.393, 27.279, 26.895, 28.361, 27.575, 27.235, 27.257, 27.704, 28.142)
 
 rbf_p_1 = c(.360, .396, .423, .406, .391, .382, .407, .427, 405, .269)
 rbf_t_1 = c(844.619, 110.985, 107.701, 84.979, 83.205, 81.037, 81.432, 95.191, 92.710, 84.916)
@@ -19,8 +19,8 @@ rbf_t_2 = c(57.389, 12.746, 11.897, 11.163, 11.623, 10.381, 11.433, 12.515, 10.2
 rbf_p_3 = c(.942, .945, .943, .936, .914, .933, .938, .923, .908, .951)
 rbf_t_3 = c(3.189, 3.118, 3.047, 2.748, 2.529, 2.391, 2.466, 2.633, 2.567, 2.563)
 
-rbf_p_4 = c(.597, .761, .396, .547, .478, .484, .679, .333, .616, .497)
-rbf_t_4 = c(144.962, 249.947, 155.652, 153.734, 161.971, 126.129, 161.093, 130.779, 161.860, 197.419)
+rbf_p_4 = c(.868, .937, .931, .893, .881, .887, .931, .906, .906, .912)
+rbf_t_4 = c(55.621, 47.157, 33.123, 45.675, 34.08, 35.682, 36.942, 29.512, 30.369, 29.672)
 
 anfis_2k_p_2 = c(.938, .945, .927, .915, .925, .932, .947, .924, .918, .915)
 anfis_2k_t_2 = c(23.159, 22.760, 22.673, 22.676, 22.674, 22.704, 22.690, 22.858, 22.651, 22.664)
@@ -39,14 +39,8 @@ anfis_2_t_1 = c(16.424, 16.172, 16.163, 16.126, 16.218, 16.097, 16.234, 16.050, 
 anfis_2_p_3 = c(.6448, .637, .643, .691, .649, .640, .631, .591, .604, .589)
 anfis_2_t_3 = c(3.938, 3.481, 3.392, 3.382, 3.398, 3.392, 3.402, 3.421, 3.391, 3.419)
 
-anfis_2_p_4pre = c(.887, .906, .836, .874, .855, .925, .906, .849, .824, .792)
-anfis_2_t_4pre = c(6.828, 6.457, 6.564, 6.541, 6.528, 6.524, 6.529, 6.491, 6.456, 6.493)
-
-anfis_2_p_4noPre = c(.893, .868, .799, .818, .837, .819, .862, .774, .805, .736)
-anfis_2_t_noPre = c(564.607, 581.605, 545.126, 512.079, 514.725, 511.458, 508.335, 514.338, 505.064, 511.774)
-
-n = rep(10, 3)
-group = rep(1:3, n)
+anfis_2_p_4pre = c(.906, .874, .887, .849, .868, .830, .893, .868, .855, .881)
+anfis_2_t_4pre = c(10.645, 10.266, 10.363, 10.335, 10.294, 10.341, 10.373, 10.282, 10.433, 10.3)
 
 hyp1 = c(mlp_p_1, rbf_p_1, anfis_2_p_1)
 hyp2 = c(mlp_p_2, rbf_p_2, anfis_2k_p_2)
@@ -55,114 +49,54 @@ hyp4 = c(mlp_p_4, rbf_p_4, anfis_2_p_4pre)
 
 hyp5 = c(anfis_2k_p_2, anfis_5_p_2, anfis_10_p_2)
 
-#hyp 6 and 7 don't go in R. 7 can be rejected already, and 6 is a t-test
-hyp8 = c(mlp_t_4, rbf_t_4, anfis_2_t_4pre)
-hyp9 = c(anfis_2k_t_2, anfis_5_t_2, anfis_10_t_2)
+hyp7 = c(mlp_t_4, rbf_t_4, anfis_2_t_4pre)
+hyp8 = c(anfis_2k_t_2, anfis_5_t_2, anfis_10_t_2)
 
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp1 = hyp1, group = factor(group))
 fit = lm(hyp1 ~ group, data)
 anova(fit)
 
+
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp2 = hyp2, group = factor(group))
 fit = lm(hyp2 ~ group, data)
 anova(fit) 
 
+
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp3 = hyp3, group = factor(group))
 fit = lm(hyp3 ~ group, data)
 anova(fit)
 
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp4 = hyp4, group = factor(group))
 fit = lm(hyp4 ~ group, data)
 anova(fit)
 
-
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp5 = hyp5, group = factor(group))
 fit = lm(hyp5 ~ group, data)
 anova(fit)
 
+n = rep(10, 3)
+group = rep(1:3, n)
+data = data.frame(hyp7 = hyp7, group = factor(group))
+fit = lm(hyp7 ~ group, data)
+anova(fit)
+
+n = rep(10, 3)
+group = rep(1:3, n)
 data = data.frame(hyp8 = hyp8, group = factor(group))
 fit = lm(hyp8 ~ group, data)
 anova(fit)
 
 
-data = data.frame(hyp9 = hyp9, group = factor(group))
-fit = lm(hyp9 ~ group, data)
-anova(fit)
 
 
 
-
-
-
-
-
-
-Analysis of Variance Table
-
-Response: hyp1
-          Df Sum Sq Mean Sq F value Pr(>F)
-group      2  10832  5416.1  0.9925 0.3838
-Residuals 27 147342  5457.1
->
-> data = data.frame(hyp2 = hyp2, group = factor(group))
-> fit = lm(hyp2 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp2
-          Df    Sum Sq    Mean Sq F value   Pr(>F)
-group      2 0.0057358 0.00286788   8.565 0.001317
-Residuals 27 0.0090406 0.00033484
->
-> data = data.frame(hyp3 = hyp3, group = factor(group))
-> fit = lm(hyp3 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp3
-          Df  Sum Sq  Mean Sq F value    Pr(>F)
-group      2 0.54408 0.272039  325.64 < 2.2e-16
-Residuals 27 0.02256 0.000835
->
-> data = data.frame(hyp4 = hyp4, group = factor(group))
-> fit = lm(hyp4 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp4
-          Df  Sum Sq Mean Sq F value    Pr(>F)
-group      2 2.62923 1.31462  145.88 3.361e-15
-Residuals 27 0.24331 0.00901
->
->
-> data = data.frame(hyp5 = hyp5, group = factor(group))
-> fit = lm(hyp5 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp5
-          Df    Sum Sq    Mean Sq F value Pr(>F)
-group      2 0.0000749 3.7433e-05  0.2693 0.7659
-Residuals 27 0.0037525 1.3898e-04
->
-> data = data.frame(hyp8 = hyp8, group = factor(group))
-> fit = lm(hyp8 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp8
-          Df Sum Sq Mean Sq F value    Pr(>F)
-group      2 130430   65215  151.84 2.049e-15
-Residuals 27  11597     430
->
->
-> data = data.frame(hyp9 = hyp9, group = factor(group))
-> fit = lm(hyp9 ~ group, data)
-> anova(fit)
-Analysis of Variance Table
-
-Response: hyp9
-          Df Sum Sq Mean Sq F value    Pr(>F)
-group      2 881.65  440.82  3420.4 < 2.2e-16
-Residuals 27   3.48    0.13
->
